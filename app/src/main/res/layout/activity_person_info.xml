@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -70,6 +71,25 @@
                     android:text=""
                     android:textColor="@color/colorWhite"
                     android:textSize="14sp" />
+
+                <at.markushi.ui.CircleButton
+                    android:id="@+id/call_colleague_butt"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="25dp"
+                    android:layout_marginRight="80dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_call_white_24dp"
+                    app:cb_color="#3470df"/>
+                <at.markushi.ui.CircleButton
+                    android:id="@+id/sms_colleague_butt"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="25dp"
+                    android:layout_marginLeft="80dp"
+                    android:layout_gravity="center"
+                    app:cb_color="#3470df"
+                    android:src="@drawable/ic_textsms_white_24dp" />
             </FrameLayout>
 
             <LinearLayout

@@ -32,6 +32,9 @@ public class EvaluateActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_evaluate);
 
+        Intent getDataIntent = getIntent();
+        getSupportActionBar().setTitle(getDataIntent.getStringExtra("evalName")); //заголовок тулбара
+
         initElements();
     }
 

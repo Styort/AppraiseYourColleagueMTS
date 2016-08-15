@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -26,20 +27,23 @@ import com.example.mtsihr.Models.Colleague;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import at.markushi.ui.CircleButton;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
 
 public class PersonInfoActivity extends AppCompatActivity {
 
-    ListView contactLV, actionsLV;
-    TextView nameTV, postTV, subdivTV;
-    ArrayList<HashMap<String, String>> conArr = new ArrayList<>();
-    Realm realm;
+    private ListView contactLV, actionsLV;
+    private TextView nameTV, postTV, subdivTV;
+    private ArrayList<HashMap<String, String>> conArr = new ArrayList<>();
+    private Realm realm;
+    private CircleButton callColleagueCB,smsColleagueCB;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person_info);
+        getSupportActionBar().setTitle("Информация о коллеге"); //заголовок тулбара
 
         realm = Realm.getDefaultInstance();
 
@@ -126,11 +130,16 @@ public class PersonInfoActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i == 0) {
                     Intent intent = new Intent(getApplicationContext(), JustActivity.class);
+                    Intent getDataIntent = getIntent();
 
-                    intent.putExtra("name", intent.getStringExtra("name"));
-                    intent.putExtra("post", intent.getStringExtra("post"));
-                    intent.putExtra("subdiv", intent.getStringExtra("subdiv"));
-                    intent.putExtra("phone", intent.getStringExtra("phone"));
+                    String email = getDataIntent.getStringExtra("email");
+                    intent.putExtra("name", getDataIntent.getStringExtra("name"));
+                    intent.putExtra("post", getDataIntent.getStringExtra("post"));
+                    intent.putExtra("subdiv", getDataIntent.getStringExtra("subdiv"));
+                    intent.putExtra("phone", getDataIntent.getStringExtra("phone"));
+                    intent.putExtra("email", getDataIntent.getStringExtra("email"));
+                    intent.putExtra("position", getDataIntent.getIntExtra("position",0));
+
                     startActivity(intent);
                 } else {
 
@@ -145,6 +154,30 @@ public class PersonInfoActivity extends AppCompatActivity {
         subdivTV = (TextView) findViewById(R.id.subdiv_tv);
         contactLV = (ListView) findViewById(R.id.lv_contacts);
         actionsLV = (ListView) findViewById(R.id.lv_action);
+        callColleagueCB = (CircleButton) findViewById(R.id.call_colleague_butt);
+        smsColleagueCB = (CircleButton) findViewById(R.id.sms_colleague_butt);
+
+        callColleagueCB.setOnClickListener(new View.OnClickListener() { //звоним коллеге
+            @Override
+            public void onClick(View view) {
+                Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + conArr.get(0).get("Data"))); //активность звонка
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+                startActivity(callActivity);
+            }
+        });
+
+        smsColleagueCB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent smsIntent = new Intent(Intent.ACTION_VIEW);
+                smsIntent.setType("vnd.android-dir/mms-sms");
+                smsIntent.putExtra("address", conArr.get(0).get("Data"));
+                smsIntent.putExtra("sms_body","Здравствуйте!");
+                startActivity(smsIntent);
+            }
+        });
 
         contactLV.setBackgroundColor(Color.WHITE);
         actionsLV.setBackgroundColor(Color.WHITE);

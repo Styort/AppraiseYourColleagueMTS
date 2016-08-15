@@ -9,18 +9,26 @@ import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mtsihr.Adapters.ColleagueAdapter;
+import com.example.mtsihr.JustActivity;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.PersonInfoActivity;
 import com.example.mtsihr.R;
@@ -45,6 +53,7 @@ public class ColleagueFragment extends Fragment {
     private EditText searachColleagueEdit;
     private View rootView;
     private final int PICK_CONTACT = 1;
+    private RealmResults<Colleague> colleagueRealmResults;
 
     public ColleagueFragment() {
         // Required empty public constructor
@@ -55,7 +64,7 @@ public class ColleagueFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_colleague, container, false);
-
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Коллеги"); //заголовок тулбара
         //убираем автооткрытие клавиатуры
         this.getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -67,8 +76,7 @@ public class ColleagueFragment extends Fragment {
         searachColleagueEdit = (EditText) rootView.findViewById(R.id.search_et);
         colleagueList = (ListView) rootView.findViewById(R.id.colleague_list);
 
-        RealmResults<Colleague> colleagueRealmResults = realm
-                .where(Colleague.class).findAll(); //считываем все данные что есть в бд
+        colleagueRealmResults = realm.where(Colleague.class).findAll(); //считываем все данные что есть в бд
         colleagues = (ArrayList<Colleague>) realm.copyFromRealm(colleagueRealmResults); //переносим данные в наш лист
         //Добавление нового контакта
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
@@ -83,9 +91,48 @@ public class ColleagueFragment extends Fragment {
 
         initAdapter();
         showInfo();
+        registerForContextMenu(colleagueList);
         searchFilter();
 
         return rootView;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getActivity().getMenuInflater();
+        inflater.inflate(R.menu.menu_context, menu);
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        String title = (String) ((TextView) info.targetView.findViewById(R.id.name)).getText(); //имя коллеги
+        menu.setHeaderTitle(title);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.estimate_menu: //переходим к оцениванию коллеги
+
+                Intent intent = new Intent(getActivity().getApplicationContext(), JustActivity.class);
+                //ПОФИКСИТЬ ПЕРЕДАЧУ И УДАЛЕНИЕ ДАННЫХ ИЗ ОТФИЛЬТРОВАННОГО СПИСКА!!!
+                intent.putExtra("name", colleagues.get(info.position).getName());
+                intent.putExtra("post", colleagues.get(info.position).getPost());
+                intent.putExtra("subdiv", colleagues.get(info.position).getSubdivision());
+                intent.putExtra("phone", colleagues.get(info.position).getPhone());
+                intent.putExtra("email", colleagues.get(info.position).getEmail());
+                intent.putExtra("position", info.position);
+                startActivity(intent);
+                return true;
+            case R.id.delete_menu: //удаляем коллегу из списка
+                realm.beginTransaction();
+                colleagueRealmResults.deleteFromRealm(info.position); //удаляем коллегу из бд
+                realm.commitTransaction();
+                FragmentTransaction ft = getFragmentManager().beginTransaction(); //обновляем фрагмент
+                ft.detach(this).attach(this).commit();
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
     }
 
     @Override
@@ -107,8 +154,9 @@ public class ColleagueFragment extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getActivity().getApplicationContext(), PersonInfoActivity.class);
 
-                Colleague concreteColleague = (Colleague) adapterView.getItemAtPosition(i);
-
+                Colleague concreteColleague = (Colleague) adapterView.getItemAtPosition(i); //получаем позицию выбранного коллеги
+                                                                                            // в листе с учетом фильтра
+                //передаем данные о коллеге в активность PersonInfo
                 intent.putExtra("name", concreteColleague.getName());
                 intent.putExtra("post", concreteColleague.getPost());
                 intent.putExtra("subdiv", concreteColleague.getSubdivision());
@@ -129,11 +177,11 @@ public class ColleagueFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_CONTACT) {
+        if (requestCode == PICK_CONTACT) { //получаем данные с контакт листа
             if (resultCode == AppCompatActivity.RESULT_OK) {
                 Uri contactData = data.getData();
-                Cursor c =  getActivity().getContentResolver().query(contactData, null, null, null, null);
-                String mContactId,mContactName,mPhoneNumber = null,mEmail = null;
+                Cursor c = getActivity().getContentResolver().query(contactData, null, null, null, null);
+                String mContactId, mContactName, mPhoneNumber = null, mEmail = null, orgName = null, orgTitle = null;
                 if (c.moveToNext()) {
                     mContactId = c.getString(c.getColumnIndex(ContactsContract.Contacts._ID));
                     mContactName = c.getString(c.getColumnIndexOrThrow(
@@ -158,6 +206,23 @@ public class ColleagueFragment extends Fragment {
                         phones.close();
                     }
 
+                    String orgWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+                    String[] orgWhereParams = new String[]{mContactId,
+                            ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE};
+
+                    //Получаем данные о работе
+                    Cursor orgCur = getActivity().getContentResolver().query(
+                            ContactsContract.Data.CONTENT_URI,
+                            null,
+                            orgWhere,
+                            orgWhereParams,
+                            null
+                            );
+                    if (orgCur.moveToFirst()) {
+                        orgName = orgCur.getString(orgCur.getColumnIndex(ContactsContract.CommonDataKinds.Organization.DATA));
+                        orgTitle = orgCur.getString(orgCur.getColumnIndex(ContactsContract.CommonDataKinds.Organization.TITLE));
+                    }
+                    orgCur.close();
                     // Достаем email-ы
                     Cursor emails = getActivity().getContentResolver().query(
                             ContactsContract.CommonDataKinds.Email.CONTENT_URI,
@@ -177,6 +242,8 @@ public class ColleagueFragment extends Fragment {
                     colleague.setName(mContactName);
                     colleague.setPhone(mPhoneNumber);
                     colleague.setEmail(mEmail);
+                    colleague.setPost(orgName);
+                    colleague.setSubdivision(orgTitle);
 
                     realm.commitTransaction();
 

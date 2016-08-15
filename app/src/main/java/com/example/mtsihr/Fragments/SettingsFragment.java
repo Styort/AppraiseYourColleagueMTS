@@ -3,6 +3,7 @@ package com.example.mtsihr.Fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +13,18 @@ import android.widget.Toast;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.R;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
+
 /**
  * A simple {@link Fragment} subclass.
  */
 public class SettingsFragment extends Fragment {
 
-    Button deleteAllDataButton;
-    View rootView;
-
+    private Button deleteAllDataButton;
+    private View rootView;
+    private Realm realm;
+    private RealmResults colleagueRealmResults;
     public SettingsFragment() {
         // Required empty public constructor
     }
@@ -28,10 +33,12 @@ public class SettingsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Настройки"); //заголовок тулбара
         rootView = inflater.inflate(R.layout.fragment_settings, container, false);
 
         initElem();
+        realm = Realm.getDefaultInstance();
+        colleagueRealmResults = realm.where(Colleague.class).findAll(); //считываем все данные что есть в бд
 
         return rootView;
     }
@@ -42,10 +49,23 @@ public class SettingsFragment extends Fragment {
         deleteAllDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                Toast.makeText(getActivity(),"Все данные удалены!", Toast.LENGTH_LONG).show();
+                realm.beginTransaction();
+                colleagueRealmResults.deleteAllFromRealm();
+                realm.commitTransaction();
+                Toast.makeText(getActivity(), "Все данные удалены!", Toast.LENGTH_LONG).show();
             }
         });
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        realm = Realm.getDefaultInstance();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        realm.close();
+    }
 }

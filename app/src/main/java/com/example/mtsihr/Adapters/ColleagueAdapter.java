@@ -58,9 +58,11 @@ public class ColleagueAdapter extends ArrayAdapter {
             colleagueList.addAll(mCopyColleagueList);
         } else {
             for (Colleague item : mCopyColleagueList) {
+                String phone = item.getPhone().replace(" ","").replace("-",""); //убираем пробелым и знаки "-" в номере телефона
+
                 if (item.subdivision != null & item.email != null & item.post != null) {
                     if (item.getName().toLowerCase(Locale.getDefault()).contains(charText) ||
-                            item.getPhone().trim().contains(charText) ||
+                            phone.contains(charText) ||
                             item.getEmail().toLowerCase(Locale.getDefault()).contains(charText) ||
                             item.getSubdivision().toLowerCase(Locale.getDefault()).contains(charText) ||
                             item.getPost().toLowerCase(Locale.getDefault()).contains(charText)) {
@@ -68,7 +70,7 @@ public class ColleagueAdapter extends ArrayAdapter {
                     }
                 } else {
                      if (item.getName().toLowerCase(Locale.getDefault()).contains(charText) ||
-                             item.getPhone().trim().contains(charText)) {
+                             phone.contains(charText)) {
                         colleagueList.add(item);
                     }
                 }
