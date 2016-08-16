@@ -27,6 +27,7 @@ import com.example.mtsihr.R;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -84,7 +85,6 @@ public class HistoryFragment extends Fragment {
                 HistoryModel concreteHistory = (HistoryModel) adapterView.getItemAtPosition(i); //получаем позицию выбранного коллеги
                                                                                                 // в листе с учетом фильтра
                 //передаем данные о истории оценки в фрагмент ConcreteHistory
-                String name = concreteHistory.getName();
                 Bundle bundle = new Bundle();
                 bundle.putString("name", concreteHistory.getName());
                 bundle.putString("post", concreteHistory.getPost());
@@ -96,6 +96,10 @@ public class HistoryFragment extends Fragment {
                 bundle.putString("creativity", concreteHistory.getCreativity());
                 bundle.putString("openness", concreteHistory.getOpenness());
                 bundle.putString("date", concreteHistory.getDateOfEval());
+                if(concreteHistory.getPhoto()!=null){
+                    bundle.putByteArray("photo",concreteHistory.getPhoto());
+                }
+
                 fragment.setArguments(bundle);
             }
         });

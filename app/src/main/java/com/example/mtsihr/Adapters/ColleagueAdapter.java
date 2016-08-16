@@ -2,8 +2,11 @@ package com.example.mtsihr.Adapters;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Filter;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by Виктор on 09.08.2016.
@@ -120,6 +125,7 @@ public class ColleagueAdapter extends ArrayAdapter {
             viewHolder.colleaguePost = (TextView) convertView.findViewById(R.id.post);
             viewHolder.colleagueSubdiv = (TextView) convertView.findViewById(R.id.subdivision);
             viewHolder.icArrowColleague = (ImageView) convertView.findViewById(R.id.ic_colleague_iv);
+            viewHolder.colleaguePhoto = (CircleImageView) convertView.findViewById(R.id.photo);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -128,6 +134,11 @@ public class ColleagueAdapter extends ArrayAdapter {
         viewHolder.colleagueName.setText(colleagueList.get(position).name); //номер телефона
         viewHolder.colleaguePost.setText(colleagueList.get(position).post); //должность
         viewHolder.colleagueSubdiv.setText(colleagueList.get(position).subdivision); //подразделение
+        if(colleagueList.get(position).getPhoto()!=null){
+            Bitmap bm = BitmapFactory.decodeByteArray(colleagueList.get(position).getPhoto(), 0,
+                    colleagueList.get(position).getPhoto().length);
+            viewHolder.colleaguePhoto.setImageBitmap(bm);
+        }
         //меняем цвет у стрелочки
         int color = Color.parseColor("#858585"); //The color u want
         viewHolder.icArrowColleague.setColorFilter(color);

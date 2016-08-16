@@ -10,8 +10,17 @@ import io.realm.RealmObject;
  */
 public class Colleague extends RealmObject {
     public String name, post, phone, email, subdivision;
+    public byte[] photo;
 
-     public Colleague(String email, String name, String phone, String post, String subdivision) {
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
+    }
+
+    public Colleague(String email, String name, String phone, String post, String subdivision) {
         this.email = email;
         this.name = name;
         this.phone = phone;

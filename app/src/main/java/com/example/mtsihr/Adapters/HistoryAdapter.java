@@ -2,6 +2,8 @@ package com.example.mtsihr.Adapters;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +20,8 @@ import com.example.mtsihr.ViewHolder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by Виктор on 15.08.2016.
@@ -76,6 +80,7 @@ public class HistoryAdapter extends ArrayAdapter {
             viewHolder.evalHistoryName = (TextView) convertView.findViewById(R.id.hist_coll_name_tv);
             viewHolder.evalHistoryDate = (TextView) convertView.findViewById(R.id.hist_eval_data_tv);
             viewHolder.icArrowColleague = (ImageView) convertView.findViewById(R.id.ic_colleague_iv);
+            viewHolder.colleaguePhoto = (CircleImageView) convertView.findViewById(R.id.hist_photo_civ);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -86,6 +91,12 @@ public class HistoryAdapter extends ArrayAdapter {
         //меняем цвет у стрелочки
         int color = Color.parseColor("#858585"); //The color u want
         viewHolder.icArrowColleague.setColorFilter(color);
+
+        if(historyEvaluate.get(position).getPhoto()!=null){
+            Bitmap bm = BitmapFactory.decodeByteArray(historyEvaluate.get(position).getPhoto(), 0,
+                    historyEvaluate.get(position).getPhoto().length);
+            viewHolder.colleaguePhoto.setImageBitmap(bm);
+        }
 
         return convertView;
     }

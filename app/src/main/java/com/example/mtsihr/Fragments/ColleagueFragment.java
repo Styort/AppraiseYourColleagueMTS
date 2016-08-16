@@ -1,8 +1,14 @@
 package com.example.mtsihr.Fragments;
 
 
+import android.content.ContentUris;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -20,17 +26,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mtsihr.Adapters.ColleagueAdapter;
+import com.example.mtsihr.Interfaces.OnBackPressedListener;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.R;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import io.realm.Realm;
@@ -40,7 +51,7 @@ import io.realm.RealmResults;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ColleagueFragment extends Fragment {
+public class ColleagueFragment extends Fragment implements OnBackPressedListener {
 
     private Realm realm;
     private ListView colleagueList;
@@ -51,6 +62,7 @@ public class ColleagueFragment extends Fragment {
     private final int PICK_CONTACT = 1;
     private RealmResults<Colleague> colleagueRealmResults;
     private FragmentTransaction transaction;
+    private FloatingActionButton fab;
 
     public ColleagueFragment() {
         // Required empty public constructor
@@ -61,7 +73,7 @@ public class ColleagueFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_colleague, container, false);
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Коллеги"); //заголовок тулбара
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Коллеги"); //заголовок тулбара
         //убираем автооткрытие клавиатуры
         this.getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -75,16 +87,35 @@ public class ColleagueFragment extends Fragment {
         initElements();
         initAdapter();
         showInfo();
+        fabShowHide();
         registerForContextMenu(colleagueList); //создаем контекстное меню для списка коллег
         searchFilter();
 
         return rootView;
     }
 
+    private void fabShowHide() { //скрыть кнопку добавить коллегу при скроле
+        colleagueList.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+                if (i == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                    fab.show();
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+                if (i > 0 || i1 < 0 && fab.isShown())
+                    fab.hide();
+            }
+        });
+    }
+
+
     private void initElements() {
         searachColleagueEdit = (EditText) rootView.findViewById(R.id.search_et);
         colleagueList = (ListView) rootView.findViewById(R.id.colleague_list);
-        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
 
         //Добавление нового контакта
         fab.setOnClickListener(new View.OnClickListener() {
@@ -118,7 +149,7 @@ public class ColleagueFragment extends Fragment {
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 transaction = fm.beginTransaction();
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-                transaction.replace(((ViewGroup)getView().getParent()).getId(), fragment);
+                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
                 transaction.commit();
 
                 Bundle bundle = new Bundle();
@@ -127,6 +158,9 @@ public class ColleagueFragment extends Fragment {
                 bundle.putString("subdiv", colleagues.get(position).getSubdivision());
                 bundle.putString("phone", colleagues.get(position).getPhone());
                 bundle.putString("email", colleagues.get(position).getEmail());
+                if(colleagues.get(position).getPhoto()!=null){
+                    bundle.putByteArray("photo", colleagues.get(position).getPhoto());
+                }
                 bundle.putInt("position", position);
                 fragment.setArguments(bundle);
                 return true;
@@ -163,11 +197,11 @@ public class ColleagueFragment extends Fragment {
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 transaction = fm.beginTransaction();
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.replace(((ViewGroup)getView().getParent()).getId(), fragment);
+                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
                 transaction.commit();
 
                 Colleague concreteColleague = (Colleague) adapterView.getItemAtPosition(i); //получаем позицию выбранного коллеги
-                                                                                            // в листе с учетом фильтра
+                // в листе с учетом фильтра
                 //передаем данные о коллеге в фрагмент PersonInfo
                 Bundle bundle = new Bundle();
                 bundle.putString("name", concreteColleague.getName());
@@ -175,6 +209,9 @@ public class ColleagueFragment extends Fragment {
                 bundle.putString("subdiv", concreteColleague.getSubdivision());
                 bundle.putString("phone", concreteColleague.getPhone());
                 bundle.putString("email", concreteColleague.getEmail());
+                if(concreteColleague.getPhoto()!=null){
+                    bundle.putByteArray("photo", concreteColleague.getPhoto());
+                }
                 Object origObj = colleagueAdapter.getItem(i);
                 int position = colleagueAdapter.getPosition(origObj);
                 bundle.putInt("position", position);
@@ -199,6 +236,14 @@ public class ColleagueFragment extends Fragment {
                 String mContactId, mContactName, mPhoneNumber = null, mEmail = null, orgName = null, orgTitle = null;
                 if (c.moveToNext()) {
                     mContactId = c.getString(c.getColumnIndex(ContactsContract.Contacts._ID));
+                    InputStream isPhoto = openDisplayPhoto(Long.parseLong(mContactId));
+                    byte[] byteArray = null;
+                    if(isPhoto!=null){
+                        Bitmap photoBmp = BitmapFactory.decodeStream(isPhoto); //получаем bitmap изображение
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        photoBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byteArray = stream.toByteArray(); //конвертируем bitmap в bytearray
+                    }
                     mContactName = c.getString(c.getColumnIndexOrThrow(
                             ContactsContract.Contacts.DISPLAY_NAME));
 
@@ -232,7 +277,7 @@ public class ColleagueFragment extends Fragment {
                             orgWhere,
                             orgWhereParams,
                             null
-                            );
+                    );
                     if (orgCur.moveToFirst()) {
                         orgName = orgCur.getString(orgCur.getColumnIndex(ContactsContract.CommonDataKinds.Organization.DATA));
                         orgTitle = orgCur.getString(orgCur.getColumnIndex(ContactsContract.CommonDataKinds.Organization.TITLE));
@@ -259,6 +304,7 @@ public class ColleagueFragment extends Fragment {
                     colleague.setEmail(mEmail);
                     colleague.setPost(orgName);
                     colleague.setSubdivision(orgTitle);
+                    colleague.setPhoto(byteArray);
 
                     realm.commitTransaction();
 
@@ -268,6 +314,19 @@ public class ColleagueFragment extends Fragment {
             }
         }
     }
+
+    public InputStream openDisplayPhoto(long contactId) { //получаем поток с фоткой коллеги
+        Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
+        Uri displayPhotoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.DISPLAY_PHOTO);
+        try {
+            AssetFileDescriptor fd =
+                    getActivity().getContentResolver().openAssetFileDescriptor(displayPhotoUri, "r");
+            return fd.createInputStream();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
 
     public void searchFilter() {
         searachColleagueEdit.addTextChangedListener(new TextWatcher() {
@@ -287,5 +346,10 @@ public class ColleagueFragment extends Fragment {
                 colleagueAdapter.filter(text);
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        getFragmentManager().popBackStack();
     }
 }

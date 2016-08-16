@@ -9,6 +9,15 @@ import io.realm.RealmObject;
  */
 public class HistoryModel extends RealmObject {
     String partnership, efficiency, responsibility, courage, creativity, openness, name, dateOfEval, post, subdiv;
+    byte[] photo;
+
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
+    }
 
     public String getCourage() {
         return courage;

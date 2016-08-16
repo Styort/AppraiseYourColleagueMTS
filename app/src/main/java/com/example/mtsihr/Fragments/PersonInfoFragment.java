@@ -5,6 +5,8 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +16,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,11 +25,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mtsihr.Interfaces.OnBackPressedListener;
 import com.example.mtsihr.MainActivity;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.R;
@@ -35,20 +40,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import at.markushi.ui.CircleButton;
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class PersonInfoFragment extends Fragment {
+public class PersonInfoFragment extends Fragment implements OnBackPressedListener {
 
     private View rootView;
     private ListView contactLV, actionsLV;
     private TextView nameTV, postTV, subdivTV;
+    private Bundle getDataBundle;
     private ArrayList<HashMap<String, String>> conArr = new ArrayList<>();
     private Realm realm;
     private CircleButton callColleagueCB, smsColleagueCB;
+    private CircleImageView circlePhotoColleague;
+    private ImageView photoBackground;
 
     public PersonInfoFragment() {
         // Required empty public constructor
@@ -65,7 +74,9 @@ public class PersonInfoFragment extends Fragment {
         realm = Realm.getDefaultInstance();
         setHasOptionsMenu(true);
 
+        getDataBundle = getArguments(); //получение данных с предыдущего фрагмента
         initElemets();
+        initAdapter();
         itemClick();
 
         return rootView;
@@ -130,7 +141,7 @@ public class PersonInfoFragment extends Fragment {
     private void itemClick() {
         contactLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) { //реализация клика на телефон или email
                 //choose app for call
                 if (i == 0) {
                     if (conArr.get(i).get("Data") != "Данные не заполнены") {
@@ -153,7 +164,7 @@ public class PersonInfoFragment extends Fragment {
         });
         actionsLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) { //переход на фрагмент с оценкой
                 if (i == 0) {
                     Fragment fragment = new JustFragment();
                     FragmentManager fm = getActivity().getSupportFragmentManager();
@@ -170,6 +181,9 @@ public class PersonInfoFragment extends Fragment {
                     passDataBundle.putString("subdiv", getDataBundle.getString("subdiv"));
                     passDataBundle.putString("phone", getDataBundle.getString("phone"));
                     passDataBundle.putString("email", getDataBundle.getString("email"));
+                    if(getDataBundle.getByteArray("photo")!=null){
+                        passDataBundle.putByteArray("photo", getDataBundle.getByteArray("photo"));
+                    }
                     passDataBundle.putInt("position", getDataBundle.getInt("position", 0));
                     fragment.setArguments(passDataBundle);
 
@@ -178,20 +192,10 @@ public class PersonInfoFragment extends Fragment {
                 }
             }
         });
-    }
-
-    private void initElemets() {
-        nameTV = (TextView) rootView.findViewById(R.id.name_tv);
-        postTV = (TextView) rootView.findViewById(R.id.post_tv);
-        subdivTV = (TextView) rootView.findViewById(R.id.subdiv_tv);
-        contactLV = (ListView) rootView.findViewById(R.id.lv_contacts);
-        actionsLV = (ListView) rootView.findViewById(R.id.lv_action);
-        callColleagueCB = (CircleButton) rootView.findViewById(R.id.call_colleague_butt);
-        smsColleagueCB = (CircleButton) rootView.findViewById(R.id.sms_colleague_butt);
 
         callColleagueCB.setOnClickListener(new View.OnClickListener() { //звоним коллеге
             @Override
-            public void onClick(View view) {
+            public void onClick(View view) { //позвонить коллеге
                 if (conArr.get(0).get("Data") != "Данные не заполнены") {
                     Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + conArr.get(0).get("Data"))); //активность звонка
                     startActivity(callActivity);
@@ -201,7 +205,7 @@ public class PersonInfoFragment extends Fragment {
 
         smsColleagueCB.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view) { //написать смс коллеге
                 if (conArr.get(0).get("Data") != "Данные не заполнены") {
                     Intent smsIntent = new Intent(Intent.ACTION_VIEW);
                     smsIntent.setType("vnd.android-dir/mms-sms");
@@ -214,19 +218,36 @@ public class PersonInfoFragment extends Fragment {
 
             }
         });
+    }
+
+    private void initElemets() {
+        nameTV = (TextView) rootView.findViewById(R.id.name_tv);
+        postTV = (TextView) rootView.findViewById(R.id.post_tv);
+        subdivTV = (TextView) rootView.findViewById(R.id.subdiv_tv);
+        contactLV = (ListView) rootView.findViewById(R.id.lv_contacts);
+        actionsLV = (ListView) rootView.findViewById(R.id.lv_action);
+        callColleagueCB = (CircleButton) rootView.findViewById(R.id.call_colleague_butt);
+        smsColleagueCB = (CircleButton) rootView.findViewById(R.id.sms_colleague_butt);
+        circlePhotoColleague = (CircleImageView) rootView.findViewById(R.id.profile_image);
+        photoBackground = (ImageView) rootView.findViewById(R.id.profile_image_back);
+
+
 
         contactLV.setBackgroundColor(Color.WHITE);
         actionsLV.setBackgroundColor(Color.WHITE);
-
-        /** получение данных о сотруднике */
-        Bundle getDataBundle = getArguments();
 
         //ловим данные с предыдущей активности
         nameTV.setText(getDataBundle.getString("name"));
         postTV.setText(getDataBundle.getString("post"));
         subdivTV.setText(getDataBundle.getString("subdiv"));
-
-
+        if(getDataBundle.getByteArray("photo")!=null){
+            byte[] photoByte = getDataBundle.getByteArray("photo");
+            Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
+            circlePhotoColleague.setImageBitmap(bm);
+            photoBackground.setImageBitmap(bm);
+        }
+    }
+    private void initAdapter() {
         HashMap<String, String> map;
 
         //создаем лист с контактными данными
@@ -269,5 +290,10 @@ public class PersonInfoFragment extends Fragment {
                 android.R.layout.simple_list_item_1, actionName));
     }
 
-
+    @Override
+    public void onBackPressed() {
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction tx = fm.beginTransaction();
+        tx.replace( R.id.fragment_container, new ColleagueFragment() ).addToBackStack( "tag" ).commit();
+    }
 }

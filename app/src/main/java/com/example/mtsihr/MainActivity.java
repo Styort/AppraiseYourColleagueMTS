@@ -1,6 +1,8 @@
 package com.example.mtsihr;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,6 +17,7 @@ import com.example.mtsihr.Fragments.HelpFragment;
 import com.example.mtsihr.Fragments.HistoryFragment;
 import com.example.mtsihr.Fragments.SettingsFragment;
 import com.example.mtsihr.Fragments.ShareFragment;
+import com.example.mtsihr.Interfaces.OnBackPressedListener;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.Models.HistoryModel;
 
@@ -65,9 +68,17 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        FragmentManager fm = getSupportFragmentManager();
+        OnBackPressedListener backPressedListener = null;
+        for (Fragment fragment: fm.getFragments()) {
+            if (fragment instanceof  OnBackPressedListener) {
+                backPressedListener = (OnBackPressedListener) fragment;
+                break;
+            }
+        }
+
+        if (backPressedListener != null) {
+            backPressedListener.onBackPressed();
         } else {
             super.onBackPressed();
         }
@@ -119,5 +130,6 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
 }

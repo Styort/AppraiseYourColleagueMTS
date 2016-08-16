@@ -1,6 +1,8 @@
 package com.example.mtsihr.Fragments;
 
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -16,6 +18,8 @@ import com.example.mtsihr.R;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -26,6 +30,7 @@ public class ConcreteHistoryFragment extends Fragment {
             courageTV, creativityTV, opennessTV, nameCollTV, dateOfEvalTV,
             postCollTV, subdivCollTV;
     private Bundle getDataBundle;
+    private CircleImageView colleagueCirclePhoto;
     public ConcreteHistoryFragment() {
         // Required empty public constructor
     }
@@ -54,6 +59,7 @@ public class ConcreteHistoryFragment extends Fragment {
         dateOfEvalTV = (TextView) rootView.findViewById(R.id.concrete_hist_date_tv);
         postCollTV = (TextView) rootView.findViewById(R.id.post_concr_hist_tv);
         subdivCollTV = (TextView) rootView.findViewById(R.id.subdivision_concr_hist_tv);
+        colleagueCirclePhoto = (CircleImageView) rootView.findViewById(R.id.photo_concr_hist_civ);
 
         //заполнение полей данными
         nameCollTV.setText(getDataBundle.getString("name"));
@@ -66,6 +72,11 @@ public class ConcreteHistoryFragment extends Fragment {
         courageTV.setText(getDataBundle.getString("courage"));
         creativityTV.setText(getDataBundle.getString("creativity"));
         opennessTV.setText(getDataBundle.getString("openness"));
+        if(getDataBundle.getByteArray("photo")!=null){
+            byte[] photoByte = getDataBundle.getByteArray("photo");
+            Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
+            colleagueCirclePhoto.setImageBitmap(bm);
+        }
 
         ArrayList<TextView> arrTVcolor = new ArrayList<>(); //массив TextView для проставления нужного цвета
         arrTVcolor.addAll(Arrays.asList(partnershipTV,efficiencyTV,responsibilityTV,creativityTV,opennessTV,courageTV)); //добавление textView

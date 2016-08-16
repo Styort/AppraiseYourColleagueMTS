@@ -2,6 +2,8 @@ package com.example.mtsihr.Fragments;
 
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -29,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
 
 /**
@@ -48,6 +51,7 @@ public class JustFragment extends Fragment {
     private LinearLayout showColleagueLL;
     private Button sendEvalButt;
     private Bundle getDataBundle;
+    private CircleImageView circlePhotoColleague;
 
     public JustFragment() {
         // Required empty public constructor
@@ -84,9 +88,8 @@ public class JustFragment extends Fragment {
         });
         sendEvalButt.setOnClickListener(new View.OnClickListener() { //отправка данных
             @Override
-            public void onClick(View view) {
+            public void onClick(View view) { //отправляем данные и сохраняем в истории
                 realm.beginTransaction();
-                // Set its fields
                 HistoryModel history = realm.createObject(HistoryModel.class);
                 history.setName(getDataBundle.getString("name"));
                 Date d = new Date();
@@ -100,6 +103,9 @@ public class JustFragment extends Fragment {
                 history.setOpenness(evaluateArr.get(5).eval);
                 history.setPartnership(evaluateArr.get(0).eval);
                 history.setResponsibility(evaluateArr.get(2).eval);
+                if(getDataBundle.getByteArray("photo")!=null){
+                    history.setPhoto(getDataBundle.getByteArray("photo"));
+                }
 
                 realm.commitTransaction();
                 Toast.makeText(getActivity(),"Данные сохранены в истории!",Toast.LENGTH_SHORT).show();
@@ -113,6 +119,7 @@ public class JustFragment extends Fragment {
         subdivEvTV = (TextView) rootView.findViewById(R.id.subdivision_from_ev);
         showColleagueLL = (LinearLayout) rootView.findViewById(R.id.show_colleague_ll);
         sendEvalButt = (Button) rootView.findViewById(R.id.send_data_button);
+        circlePhotoColleague = (CircleImageView) rootView.findViewById(R.id.photo_from_ev);
 
         showColleagueLL.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,6 +140,9 @@ public class JustFragment extends Fragment {
                 passDataBundle.putString("subdiv", getDataBundle.getString("subdiv"));
                 passDataBundle.putString("phone", getDataBundle.getString("phone"));
                 passDataBundle.putString("email", getDataBundle.getString("email"));
+                if(getDataBundle.getByteArray("photo")!=null){
+                    passDataBundle.putByteArray("photo", getDataBundle.getByteArray("photo"));
+                }
                 passDataBundle.putInt("position", getDataBundle.getInt("position"));
                 fragment.setArguments(passDataBundle);
             }
@@ -143,6 +153,11 @@ public class JustFragment extends Fragment {
         nameEvTV.setText(getDataBundle.getString("name"));
         postEvTV.setText(getDataBundle.getString("post"));
         subdivEvTV.setText(getDataBundle.getString("subdiv"));
+        if(getDataBundle.getByteArray("photo")!=null){
+            byte[] photoByte = getDataBundle.getByteArray("photo");
+            Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
+            circlePhotoColleague.setImageBitmap(bm);
+        }
 
         evalLV = (ListView) rootView.findViewById(R.id.evaluate_list);
         evaluateArr = new ArrayList<>();
