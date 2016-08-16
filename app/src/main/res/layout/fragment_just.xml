@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".JustActivity">
+    tools:context="com.example.mtsihr.Fragments.JustFragment">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -85,9 +85,11 @@
                 android:background="@color/colorWhite" />
 
             <Button
+                android:id="@+id/send_data_button"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Отправить"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
+

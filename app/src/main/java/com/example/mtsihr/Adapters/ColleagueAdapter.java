@@ -51,30 +51,59 @@ public class ColleagueAdapter extends ArrayAdapter {
         return position;
     }
 
-    public void filter(String charText) {
+    public void filter(String charText) { //реализация фильтра поиска
         charText = charText.toLowerCase(Locale.getDefault());
         colleagueList = new ArrayList<>();
         if (charText.length() == 0) {
             colleagueList.addAll(mCopyColleagueList);
         } else {
             for (Colleague item : mCopyColleagueList) {
-                String phone = item.getPhone().replace(" ","").replace("-",""); //убираем пробелым и знаки "-" в номере телефона
-
-                if (item.subdivision != null & item.email != null & item.post != null) {
-                    if (item.getName().toLowerCase(Locale.getDefault()).contains(charText) ||
-                            phone.contains(charText) ||
-                            item.getEmail().toLowerCase(Locale.getDefault()).contains(charText) ||
-                            item.getSubdivision().toLowerCase(Locale.getDefault()).contains(charText) ||
-                            item.getPost().toLowerCase(Locale.getDefault()).contains(charText)) {
-                        colleagueList.add(item);
+                if (item.getPhone() != null) {
+                    String phone = item.getPhone().replace(" ", "").replace("-", ""); //убираем пробелым и знаки "-" в номере телефона
+                    if (item.subdivision != null & item.email != null & item.post != null) { //поиск для случая когда все данные заполнены
+                        if (item.getName().toLowerCase(Locale.getDefault()).contains(charText) ||
+                                phone.contains(charText) ||
+                                item.getEmail().toLowerCase(Locale.getDefault()).contains(charText) ||
+                                item.getSubdivision().toLowerCase(Locale.getDefault()).contains(charText) ||
+                                item.getPost().toLowerCase(Locale.getDefault()).contains(charText)) {
+                            colleagueList.add(item);
+                        }
+                    } else {
+                        if (item.subdivision != null & item.post != null) { //поиск для случая когда все данные кроме email заполнены
+                            if (item.getName().toLowerCase(Locale.getDefault()).contains(charText) ||
+                                    phone.contains(charText) ||
+                                    item.getSubdivision().toLowerCase(Locale.getDefault()).contains(charText) ||
+                                    item.getPost().toLowerCase(Locale.getDefault()).contains(charText)) {
+                                colleagueList.add(item);
+                            }
+                        } else {
+                            if (item.getName().toLowerCase(Locale.getDefault()).contains(charText) || //поиск для случая когда заполнены только имя и телефон
+                                    phone.contains(charText)) {
+                                colleagueList.add(item);
+                            }
+                        }
                     }
-                } else {
-                     if (item.getName().toLowerCase(Locale.getDefault()).contains(charText) ||
-                             phone.contains(charText)) {
-                        colleagueList.add(item);
+                } else { //когда телефон не заполнен
+                    if (item.subdivision != null & item.email != null & item.post != null) {
+                        if (item.getName().toLowerCase(Locale.getDefault()).contains(charText) ||
+                                item.getEmail().toLowerCase(Locale.getDefault()).contains(charText) ||
+                                item.getSubdivision().toLowerCase(Locale.getDefault()).contains(charText) ||
+                                item.getPost().toLowerCase(Locale.getDefault()).contains(charText)) {
+                            colleagueList.add(item);
+                        }
+                    } else {
+                        if (item.email != null) {
+                            if (item.getName().toLowerCase(Locale.getDefault()).contains(charText) ||
+                                    item.getEmail().toLowerCase(Locale.getDefault()).contains(charText)) {
+                                colleagueList.add(item);
+                            }
+                        } else {
+                            if (item.getName().toLowerCase(Locale.getDefault()).contains(charText)) {
+                                colleagueList.add(item);
+                            }
+                        }
                     }
                 }
-
             }
         }
         notifyDataSetChanged();

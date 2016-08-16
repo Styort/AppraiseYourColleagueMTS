@@ -22,8 +22,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".PersonInfoActivity" />
-        <activity android:name=".JustActivity" />
         <activity android:name=".EvaluateActivity"></activity>
     </application>
 

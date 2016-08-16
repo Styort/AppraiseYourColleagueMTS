@@ -16,6 +16,7 @@ import com.example.mtsihr.Fragments.HistoryFragment;
 import com.example.mtsihr.Fragments.SettingsFragment;
 import com.example.mtsihr.Fragments.ShareFragment;
 import com.example.mtsihr.Models.Colleague;
+import com.example.mtsihr.Models.HistoryModel;
 
 import java.util.ArrayList;
 
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity
 
         colleagues = new ArrayList<>();
 
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).build();
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).deleteRealmIfMigrationNeeded().build();
         Realm.setDefaultConfiguration(realmConfiguration);
 
         //set the fragment initially

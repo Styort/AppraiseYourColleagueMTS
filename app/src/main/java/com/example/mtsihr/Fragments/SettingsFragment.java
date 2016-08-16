@@ -25,6 +25,8 @@ public class SettingsFragment extends Fragment {
     private View rootView;
     private Realm realm;
     private RealmResults colleagueRealmResults;
+    private RealmResults historyRealmResult;
+
     public SettingsFragment() {
         // Required empty public constructor
     }
@@ -51,6 +53,7 @@ public class SettingsFragment extends Fragment {
             public void onClick(View view) {
                 realm.beginTransaction();
                 colleagueRealmResults.deleteAllFromRealm();
+                historyRealmResult.deleteAllFromRealm();
                 realm.commitTransaction();
                 Toast.makeText(getActivity(), "Все данные удалены!", Toast.LENGTH_LONG).show();
             }

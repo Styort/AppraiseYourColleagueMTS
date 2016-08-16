@@ -8,12 +8,11 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -25,19 +24,15 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.mtsihr.Adapters.ColleagueAdapter;
-import com.example.mtsihr.JustActivity;
 import com.example.mtsihr.Models.Colleague;
-import com.example.mtsihr.PersonInfoActivity;
 import com.example.mtsihr.R;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 
 
@@ -54,6 +49,7 @@ public class ColleagueFragment extends Fragment {
     private View rootView;
     private final int PICK_CONTACT = 1;
     private RealmResults<Colleague> colleagueRealmResults;
+    private FragmentTransaction transaction;
 
     public ColleagueFragment() {
         // Required empty public constructor
@@ -68,18 +64,28 @@ public class ColleagueFragment extends Fragment {
         //убираем автооткрытие клавиатуры
         this.getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-
-        // Create the Realm configuration
-        // Open the Realm for the UI thread.
         realm = Realm.getDefaultInstance();
         colleagues = new ArrayList<>();
-        searachColleagueEdit = (EditText) rootView.findViewById(R.id.search_et);
-        colleagueList = (ListView) rootView.findViewById(R.id.colleague_list);
 
         colleagueRealmResults = realm.where(Colleague.class).findAll(); //считываем все данные что есть в бд
         colleagues = (ArrayList<Colleague>) realm.copyFromRealm(colleagueRealmResults); //переносим данные в наш лист
+
+
+        initElements();
+        initAdapter();
+        showInfo();
+        registerForContextMenu(colleagueList); //создаем контекстное меню для списка коллег
+        searchFilter();
+
+        return rootView;
+    }
+
+    private void initElements() {
+        searachColleagueEdit = (EditText) rootView.findViewById(R.id.search_et);
+        colleagueList = (ListView) rootView.findViewById(R.id.colleague_list);
+        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+
         //Добавление нового контакта
-        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -87,21 +93,13 @@ public class ColleagueFragment extends Fragment {
                 startActivityForResult(intent, PICK_CONTACT);
             }
         });
-
-
-        initAdapter();
-        showInfo();
-        registerForContextMenu(colleagueList);
-        searchFilter();
-
-        return rootView;
     }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater inflater = getActivity().getMenuInflater();
-        inflater.inflate(R.menu.menu_context, menu);
+        inflater.inflate(R.menu.menu_context_colleague, menu);
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
         String title = (String) ((TextView) info.targetView.findViewById(R.id.name)).getText(); //имя коллеги
         menu.setHeaderTitle(title);
@@ -113,22 +111,28 @@ public class ColleagueFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.estimate_menu: //переходим к оцениванию коллеги
 
-                Intent intent = new Intent(getActivity().getApplicationContext(), JustActivity.class);
-                //ПОФИКСИТЬ ПЕРЕДАЧУ И УДАЛЕНИЕ ДАННЫХ ИЗ ОТФИЛЬТРОВАННОГО СПИСКА!!!
-                intent.putExtra("name", colleagues.get(info.position).getName());
-                intent.putExtra("post", colleagues.get(info.position).getPost());
-                intent.putExtra("subdiv", colleagues.get(info.position).getSubdivision());
-                intent.putExtra("phone", colleagues.get(info.position).getPhone());
-                intent.putExtra("email", colleagues.get(info.position).getEmail());
-                intent.putExtra("position", info.position);
-                startActivity(intent);
+                Fragment fragment = new JustFragment();
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                transaction = fm.beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                transaction.replace(((ViewGroup)getView().getParent()).getId(), fragment);
+                transaction.commit();
+
+                Bundle bundle = new Bundle();
+                bundle.putString("name", colleagues.get(info.position).getName());
+                bundle.putString("post", colleagues.get(info.position).getPost());
+                bundle.putString("subdiv", colleagues.get(info.position).getSubdivision());
+                bundle.putString("phone", colleagues.get(info.position).getPhone());
+                bundle.putString("email", colleagues.get(info.position).getEmail());
+                bundle.putInt("position", info.position);
+                fragment.setArguments(bundle);
                 return true;
             case R.id.delete_menu: //удаляем коллегу из списка
                 realm.beginTransaction();
                 colleagueRealmResults.deleteFromRealm(info.position); //удаляем коллегу из бд
                 realm.commitTransaction();
-                FragmentTransaction ft = getFragmentManager().beginTransaction(); //обновляем фрагмент
-                ft.detach(this).attach(this).commit();
+                transaction = getFragmentManager().beginTransaction(); //обновляем фрагмент
+                transaction.detach(this).attach(this).commit();
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -152,18 +156,24 @@ public class ColleagueFragment extends Fragment {
         colleagueList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(getActivity().getApplicationContext(), PersonInfoActivity.class);
+                Fragment fragment = new PersonInfoFragment();
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                transaction = fm.beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.replace(((ViewGroup)getView().getParent()).getId(), fragment);
+                transaction.commit();
 
                 Colleague concreteColleague = (Colleague) adapterView.getItemAtPosition(i); //получаем позицию выбранного коллеги
                                                                                             // в листе с учетом фильтра
-                //передаем данные о коллеге в активность PersonInfo
-                intent.putExtra("name", concreteColleague.getName());
-                intent.putExtra("post", concreteColleague.getPost());
-                intent.putExtra("subdiv", concreteColleague.getSubdivision());
-                intent.putExtra("email", concreteColleague.getEmail());
-                intent.putExtra("phone", concreteColleague.getPhone());
-                intent.putExtra("position", i);
-                startActivity(intent);
+                //передаем данные о коллеге в фрагмент PersonInfo
+                Bundle bundle = new Bundle();
+                bundle.putString("name", concreteColleague.getName());
+                bundle.putString("post", concreteColleague.getPost());
+                bundle.putString("subdiv", concreteColleague.getSubdivision());
+                bundle.putString("phone", concreteColleague.getPhone());
+                bundle.putString("email", concreteColleague.getEmail());
+                bundle.putInt("position", i);
+                fragment.setArguments(bundle);
             }
         });
     }
