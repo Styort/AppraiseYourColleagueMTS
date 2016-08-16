@@ -30,6 +30,7 @@ import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.R;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import io.realm.Realm;
@@ -108,6 +109,8 @@ public class ColleagueFragment extends Fragment {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        Object origObj = colleagueAdapter.getItem(info.position); //получаем нажатый обьект в отфильтрованном листе
+        int position = colleagueAdapter.getPosition(origObj); //находим позицию объекта origObj в неотфильтрованном листе
         switch (item.getItemId()) {
             case R.id.estimate_menu: //переходим к оцениванию коллеги
 
@@ -119,17 +122,17 @@ public class ColleagueFragment extends Fragment {
                 transaction.commit();
 
                 Bundle bundle = new Bundle();
-                bundle.putString("name", colleagues.get(info.position).getName());
-                bundle.putString("post", colleagues.get(info.position).getPost());
-                bundle.putString("subdiv", colleagues.get(info.position).getSubdivision());
-                bundle.putString("phone", colleagues.get(info.position).getPhone());
-                bundle.putString("email", colleagues.get(info.position).getEmail());
-                bundle.putInt("position", info.position);
+                bundle.putString("name", colleagues.get(position).getName());
+                bundle.putString("post", colleagues.get(position).getPost());
+                bundle.putString("subdiv", colleagues.get(position).getSubdivision());
+                bundle.putString("phone", colleagues.get(position).getPhone());
+                bundle.putString("email", colleagues.get(position).getEmail());
+                bundle.putInt("position", position);
                 fragment.setArguments(bundle);
                 return true;
             case R.id.delete_menu: //удаляем коллегу из списка
                 realm.beginTransaction();
-                colleagueRealmResults.deleteFromRealm(info.position); //удаляем коллегу из бд
+                colleagueRealmResults.deleteFromRealm(position); //удаляем коллегу из бд
                 realm.commitTransaction();
                 transaction = getFragmentManager().beginTransaction(); //обновляем фрагмент
                 transaction.detach(this).attach(this).commit();
@@ -172,7 +175,9 @@ public class ColleagueFragment extends Fragment {
                 bundle.putString("subdiv", concreteColleague.getSubdivision());
                 bundle.putString("phone", concreteColleague.getPhone());
                 bundle.putString("email", concreteColleague.getEmail());
-                bundle.putInt("position", i);
+                Object origObj = colleagueAdapter.getItem(i);
+                int position = colleagueAdapter.getPosition(origObj);
+                bundle.putInt("position", position);
                 fragment.setArguments(bundle);
             }
         });
