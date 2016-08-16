@@ -27,8 +27,6 @@ public class ColleagueAdapter extends ArrayAdapter {
     Activity context;
     List<Colleague> colleagueList;
     List<Colleague> mCopyColleagueList;
-    ViewHolder viewHolder;
-
 
     public ColleagueAdapter(Context context, int resource, ArrayList objects) {
         super(context, resource, objects);
@@ -112,6 +110,7 @@ public class ColleagueAdapter extends ArrayAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        ViewHolder viewHolder;
 
         if (convertView == null) {
             LayoutInflater inflater = context.getLayoutInflater();

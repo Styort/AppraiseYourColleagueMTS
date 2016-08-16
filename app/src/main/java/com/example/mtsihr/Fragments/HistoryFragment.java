@@ -127,10 +127,12 @@ public class HistoryFragment extends Fragment {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        Object origObj = historyAdapter.getItem(info.position); //получаем нажатый обьект в отфильтрованном листе
+        int position = historyAdapter.getPosition(origObj); //находим позицию объекта origObj в неотфильтрованном листе
         switch (item.getItemId()) {
             case R.id.delete_menu: //удаляем историю оценки из списка
                 realm.beginTransaction();
-                historyRealmResults.deleteFromRealm(info.position); //удаляем историю из бд
+                historyRealmResults.deleteFromRealm(position); //удаляем историю из бд
                 realm.commitTransaction();
                 transaction = getFragmentManager().beginTransaction(); //обновляем фрагмент
                 transaction.detach(this).attach(this).commit();
