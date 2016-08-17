@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,6 +53,8 @@ public class JustFragment extends Fragment {
     private Button sendEvalButt;
     private Bundle getDataBundle;
     private CircleImageView circlePhotoColleague;
+    private String name, post, subdiv, phone, email;
+    private byte[] photo = null;
 
     public JustFragment() {
         // Required empty public constructor
@@ -63,54 +66,26 @@ public class JustFragment extends Fragment {
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_just, container, false);
 
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("ПРОСТО"); //заголовок тулбара
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("ПРОСТО"); //заголовок тулбара
 
         realm.getDefaultInstance();
         getDataBundle = getArguments(); //получаем данные от предыдущего фрагмента
-
+        getData();
         initElements();
         initClicks();
 
         return rootView;
     }
 
-
-    private void initClicks() {
-        evalLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) { //переход к выбору оценки
-                Intent getEvelIntent = new Intent(getContext(), EvaluateActivity.class);
-                getEvelIntent.putExtra("evalName", firstSymbol[i] + quality[i]);
-                getEvelIntent.putExtra("position", i);
-                getEvelIntent.putExtra("eval", evaluateArr.get(i).eval);
-                startActivityForResult(getEvelIntent, 1);
-            }
-        });
-        sendEvalButt.setOnClickListener(new View.OnClickListener() { //отправка данных
-            @Override
-            public void onClick(View view) { //отправляем данные и сохраняем в истории
-                realm.beginTransaction();
-                HistoryModel history = realm.createObject(HistoryModel.class);
-                history.setName(getDataBundle.getString("name"));
-                Date d = new Date();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy hh:mm");
-                history.setPost(getDataBundle.getString("post"));
-                history.setSubdiv(getDataBundle.getString("subdiv"));
-                history.setDateOfEval(dateFormat.format(d));
-                history.setCourage(evaluateArr.get(3).eval);
-                history.setCreativity(evaluateArr.get(4).eval);
-                history.setEfficiency(evaluateArr.get(1).eval);
-                history.setOpenness(evaluateArr.get(5).eval);
-                history.setPartnership(evaluateArr.get(0).eval);
-                history.setResponsibility(evaluateArr.get(2).eval);
-                if(getDataBundle.getByteArray("photo")!=null){
-                    history.setPhoto(getDataBundle.getByteArray("photo"));
-                }
-
-                realm.commitTransaction();
-                Toast.makeText(getActivity(),"Данные сохранены в истории!",Toast.LENGTH_SHORT).show();
-            }
-        });
+    public void getData() {
+        name = getDataBundle.getString("name");
+        post = getDataBundle.getString("post");
+        subdiv = getDataBundle.getString("subdiv");
+        phone = getDataBundle.getString("phone");
+        email = getDataBundle.getString("email");
+        if (getDataBundle.getByteArray("photo") != null) {
+            photo = getDataBundle.getByteArray("photo");
+        }
     }
 
     private void initElements() {
@@ -129,19 +104,19 @@ public class JustFragment extends Fragment {
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 FragmentTransaction transaction = fm.beginTransaction();
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.replace(((ViewGroup)getView().getParent()).getId(), fragment);
+                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
                 transaction.commit();
 
 
                 Bundle passDataBundle = new Bundle(); //передаем данные в слудующий фрагмент
 
-                passDataBundle.putString("name", getDataBundle.getString("name"));
-                passDataBundle.putString("post", getDataBundle.getString("post"));
-                passDataBundle.putString("subdiv", getDataBundle.getString("subdiv"));
-                passDataBundle.putString("phone", getDataBundle.getString("phone"));
-                passDataBundle.putString("email", getDataBundle.getString("email"));
-                if(getDataBundle.getByteArray("photo")!=null){
-                    passDataBundle.putByteArray("photo", getDataBundle.getByteArray("photo"));
+                passDataBundle.putString("name", name);
+                passDataBundle.putString("post", post);
+                passDataBundle.putString("subdiv", subdiv);
+                passDataBundle.putString("phone", phone);
+                passDataBundle.putString("email", email);
+                if (photo != null) {
+                    passDataBundle.putByteArray("photo", photo);
                 }
                 passDataBundle.putInt("position", getDataBundle.getInt("position"));
                 fragment.setArguments(passDataBundle);
@@ -150,10 +125,10 @@ public class JustFragment extends Fragment {
 
         /** получение данных о сотруднике */
         //ловим данные с предыдущей активности
-        nameEvTV.setText(getDataBundle.getString("name"));
-        postEvTV.setText(getDataBundle.getString("post"));
-        subdivEvTV.setText(getDataBundle.getString("subdiv"));
-        if(getDataBundle.getByteArray("photo")!=null){
+        nameEvTV.setText(name);
+        postEvTV.setText(post);
+        subdivEvTV.setText(subdiv);
+        if (photo != null) {
             byte[] photoByte = getDataBundle.getByteArray("photo");
             Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
             circlePhotoColleague.setImageBitmap(bm);
@@ -165,7 +140,6 @@ public class JustFragment extends Fragment {
         for (int i = 0; i < quality.length; i++) {
             evaluateArr.add(new Evaluate(firstSymbol[i], quality[i], "Качество не проявлено"));
         }
-
         initAdapter();
         setListViewHeightBasedOnChildren(evalLV);
     }
@@ -174,6 +148,74 @@ public class JustFragment extends Fragment {
         evaluateAdapter = new EvaluateAdapter(getActivity(), R.layout.evaluate_list_item, evaluateArr);
         evalLV.setAdapter(evaluateAdapter);
         evaluateAdapter.notifyDataSetChanged();
+    }
+
+    private void initClicks() {
+        evalLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) { //переход к выбору оценки
+                Intent getEvelIntent = new Intent(getContext(), EvaluateActivity.class);
+                getEvelIntent.putExtra("evalName", firstSymbol[i] + quality[i]);
+                getEvelIntent.putExtra("position", i);
+                getEvelIntent.putExtra("eval", evaluateArr.get(i).eval);
+                startActivityForResult(getEvelIntent, 1);
+            }
+        });
+        sendEvalButt.setOnClickListener(new View.OnClickListener() { //отправка данных
+            @Override
+            public void onClick(View view) { //отправляем данные и сохраняем в истории
+                realm.beginTransaction();
+                HistoryModel history = realm.createObject(HistoryModel.class);
+                history.setName(name);
+                Date d = new Date();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy hh:mm");
+                history.setPost(post);
+                history.setSubdiv(subdiv);
+                history.setDateOfEval(dateFormat.format(d));
+                history.setCourage(evaluateArr.get(3).eval);
+                history.setCreativity(evaluateArr.get(4).eval);
+                history.setEfficiency(evaluateArr.get(1).eval);
+                history.setOpenness(evaluateArr.get(5).eval);
+                history.setPartnership(evaluateArr.get(0).eval);
+                history.setResponsibility(evaluateArr.get(2).eval);
+                if (photo != null) {
+                    history.setPhoto(photo);
+                }
+
+                int assessment[] = new int[6];
+                for (int i = 0; i < evaluateArr.size(); i++) {
+                    switch (evaluateArr.get(i).eval) {
+                        case "Не соответствует ожиданиям":
+                            assessment[i] = 1;
+                            break;
+                        case "Соответствует ожиданиям":
+                            assessment[i] = 2;
+                            break;
+                        case "Превосходит ожидания":
+                            assessment[i] = 3;
+                            break;
+                        case "Значительно превосходит ожидания":
+                            assessment[i] = 4;
+                            break;
+                        default:
+                            assessment[i] = 0;
+                    }
+                }
+                realm.commitTransaction();
+                Toast.makeText(getActivity(), "Данные сохранены в истории!", Toast.LENGTH_SHORT).show();
+
+                Intent emailIntent = new Intent(Intent.ACTION_SEND); //переходим на отправку email
+                emailIntent.setType("text/plain");
+                emailIntent.putExtra(Intent.EXTRA_EMAIL, "prosto_mail@mts.ru"); //кому отправляем
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Оценка [" + name + "," + phone + "]"); //тема письма
+                emailIntent.putExtra(Intent.EXTRA_TEXT, "<Имя>" + name + "</Имя> \n <Телефон>" + phone + "</Телефон> \n " +  //текст письма
+                        "<Партнерство>" + assessment[0] + "</Партнерство> \n <Результативность>" + assessment[1] + "</Результативность>" +
+                        "<Ответственность>" + assessment[2] + "</Ответственность> \n <Смелость>" + assessment[3] + "</Смелость>" +
+                        "<Творчество>" + assessment[4] + "</Творчество> \n <Открытость>" + assessment[5] + "</Открытость>");
+
+                startActivity(Intent.createChooser(emailIntent, "Send Email"));
+            }
+        });
     }
 
     public static void setListViewHeightBasedOnChildren(ListView listView) { //выставляем высоту листа в зависимости от кол-ва элементов
@@ -220,4 +262,5 @@ public class JustFragment extends Fragment {
         super.onStop();
         realm.close();
     }
+
 }

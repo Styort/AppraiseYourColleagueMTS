@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,13 +90,14 @@ public class HistoryAdapter extends ArrayAdapter {
         viewHolder.evalHistoryName.setText(historyEvaluate.get(position).getName()); //номер телефона
         viewHolder.evalHistoryDate.setText(historyEvaluate.get(position).getDateOfEval()); //должность
         //меняем цвет у стрелочки
-        int color = Color.parseColor("#858585"); //The color u want
-        viewHolder.icArrowColleague.setColorFilter(color);
+        int color = Color.parseColor("#858585"); //The color u wantviewHolder.icArrowColleague.setColorFilter(color);
 
-        if(historyEvaluate.get(position).getPhoto()!=null){
+        if(historyEvaluate.get(position).getPhoto()!=null){ //проверяем, если ли фото у контакта и добавляем фото если есть
             Bitmap bm = BitmapFactory.decodeByteArray(historyEvaluate.get(position).getPhoto(), 0,
                     historyEvaluate.get(position).getPhoto().length);
             viewHolder.colleaguePhoto.setImageBitmap(bm);
+        }else {
+            viewHolder.colleaguePhoto.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.photo));
         }
 
         return convertView;

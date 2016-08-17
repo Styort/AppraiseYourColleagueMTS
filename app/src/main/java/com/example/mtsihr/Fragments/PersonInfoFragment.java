@@ -58,6 +58,8 @@ public class PersonInfoFragment extends Fragment implements OnBackPressedListene
     private CircleButton callColleagueCB, smsColleagueCB;
     private CircleImageView circlePhotoColleague;
     private ImageView photoBackground;
+    private String name, post, subdiv, phone, email;
+    private byte[] photo = null;
 
     public PersonInfoFragment() {
         // Required empty public constructor
@@ -73,13 +75,185 @@ public class PersonInfoFragment extends Fragment implements OnBackPressedListene
 
         realm = Realm.getDefaultInstance();
         setHasOptionsMenu(true);
-
         getDataBundle = getArguments(); //получение данных с предыдущего фрагмента
+        getData();
         initElemets();
         initAdapter();
         itemClick();
 
         return rootView;
+    }
+
+    public void getData() {
+        name = getDataBundle.getString("name");
+        post = getDataBundle.getString("post");
+        subdiv = getDataBundle.getString("subdiv");
+        phone = getDataBundle.getString("phone");
+        email = getDataBundle.getString("email");
+        if (getDataBundle.getByteArray("photo") != null) {
+            photo = getDataBundle.getByteArray("photo");
+        }
+    }
+
+    private void initElemets() {
+        nameTV = (TextView) rootView.findViewById(R.id.name_tv);
+        postTV = (TextView) rootView.findViewById(R.id.post_tv);
+        subdivTV = (TextView) rootView.findViewById(R.id.subdiv_tv);
+        contactLV = (ListView) rootView.findViewById(R.id.lv_contacts);
+        actionsLV = (ListView) rootView.findViewById(R.id.lv_action);
+        callColleagueCB = (CircleButton) rootView.findViewById(R.id.call_colleague_butt);
+        smsColleagueCB = (CircleButton) rootView.findViewById(R.id.sms_colleague_butt);
+        circlePhotoColleague = (CircleImageView) rootView.findViewById(R.id.profile_image);
+        photoBackground = (ImageView) rootView.findViewById(R.id.profile_image_back);
+
+
+        contactLV.setBackgroundColor(Color.WHITE);
+        actionsLV.setBackgroundColor(Color.WHITE);
+
+        //ловим данные с предыдущей активности
+        nameTV.setText(name);
+        postTV.setText(post);
+        subdivTV.setText(subdiv);
+        if (photo != null) {
+            byte[] photoByte = photo;
+            Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
+            circlePhotoColleague.setImageBitmap(bm);
+            photoBackground.setImageBitmap(bm);
+        }
+    }
+
+    private void initAdapter() {
+        HashMap<String, String> map;
+
+        //создаем лист с контактными данными
+        map = new HashMap<String, String>();
+        map.put("Name", "сотовый");
+        if (phone != null) {
+            map.put("Data", phone);
+        } else {
+            map.put("Data", "Данные не заполнены");
+        }
+        conArr.add(map);
+        try {
+            if (email != null) {
+                map = new HashMap<String, String>();
+                map.put("Name", "рабочий");
+                map.put("Data", email);
+                conArr.add(map);
+            }
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
+
+
+        SimpleAdapter adapter = new SimpleAdapter(getActivity(), conArr, android.R.layout.simple_list_item_2,
+                new String[]{"Name", "Data"},
+                new int[]{android.R.id.text1, android.R.id.text2}) {
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView text1 = (TextView) view.findViewById(android.R.id.text1);
+                TextView text2 = (TextView) view.findViewById(android.R.id.text2);
+                text1.setTextColor(Color.parseColor("#76b9f1"));
+                return view;
+            }
+        };
+        contactLV.setAdapter(adapter);
+
+        //лист с действиями
+        String[] actionName = {"Оценить коллегу", "Заказать детальный отчет"};
+        actionsLV.setAdapter(new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_list_item_1, actionName));
+    }
+
+    private void itemClick() {
+        contactLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) { //реализация клика на телефон или email
+                //choose app for call
+                if (i == 0) {
+                    if (conArr.get(i).get("Data") != "Данные не заполнены") {
+                        String phoneNum = conArr.get(i).get("Data");
+                        Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNum));
+                        startActivity(callActivity);
+                    }
+                } else {
+                    //send email
+                    String email = conArr.get(i).get("Data");
+                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                    emailIntent.setType("text/plain");
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, email);
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, "Здравствуйте!");
+
+                    startActivity(Intent.createChooser(emailIntent, "Send Email"));
+                }
+            }
+        });
+        actionsLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) { //переход на фрагмент с оценкой
+                if (i == 0) {
+                    Fragment fragment = new JustFragment();
+                    FragmentManager fm = getActivity().getSupportFragmentManager();
+                    FragmentTransaction transaction = fm.beginTransaction();
+                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
+                    transaction.commit();
+
+                    Bundle getDataBundle = getArguments(); //получаем данные от предыдущего фрагмента
+                    Bundle passDataBundle = new Bundle(); //передаем данные в слудующий фрагмент
+
+                    passDataBundle.putString("name", name);
+                    passDataBundle.putString("post", post);
+                    passDataBundle.putString("subdiv", subdiv);
+                    passDataBundle.putString("phone", phone);
+                    passDataBundle.putString("email", email);
+                    if (photo != null) {
+                        passDataBundle.putByteArray("photo", photo);
+                    }
+                    passDataBundle.putInt("position", getDataBundle.getInt("position", 0));
+                    fragment.setArguments(passDataBundle);
+
+                } else {
+                    //send email
+                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                    emailIntent.setType("text/plain");
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, "prosto_mail@mts.ru"); //кому отправить
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Детальный отчет по оценке"); //тема письма
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, "<Имя>"+name+"</Имя> \n <Телефон>"+phone+"</Телефон>"); //текст письма
+
+                    startActivity(Intent.createChooser(emailIntent, "Send Email"));
+                }
+            }
+        });
+
+        callColleagueCB.setOnClickListener(new View.OnClickListener() { //звоним коллеге
+            @Override
+            public void onClick(View view) { //позвонить коллеге
+                if (conArr.get(0).get("Data") != "Данные не заполнены") {
+                    Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + conArr.get(0).get("Data"))); //активность звонка
+                    startActivity(callActivity);
+                } else {
+                    Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        smsColleagueCB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) { //написать смс коллеге
+                if (conArr.get(0).get("Data") != "Данные не заполнены") {
+                    Intent smsIntent = new Intent(Intent.ACTION_VIEW);
+                    smsIntent.setType("vnd.android-dir/mms-sms");
+                    smsIntent.putExtra("address", conArr.get(0).get("Data"));
+                    smsIntent.putExtra("sms_body", "Здравствуйте!");
+                    startActivity(smsIntent);
+                } else {
+                    Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
     }
 
     @Override
@@ -138,162 +312,12 @@ public class PersonInfoFragment extends Fragment implements OnBackPressedListene
         return (super.onOptionsItemSelected(item));
     }
 
-    private void itemClick() {
-        contactLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) { //реализация клика на телефон или email
-                //choose app for call
-                if (i == 0) {
-                    if (conArr.get(i).get("Data") != "Данные не заполнены") {
-                        String phoneNum = conArr.get(i).get("Data");
-                        Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNum));
-                        startActivity(callActivity);
-                    }
-                } else {
-                    //send email
-                    String email = conArr.get(i).get("Data");
-                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
-                    emailIntent.setType("text/plain");
-                    emailIntent.putExtra(Intent.EXTRA_EMAIL, email);
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
-                    emailIntent.putExtra(Intent.EXTRA_TEXT, "Здравствуйте!");
-
-                    startActivity(Intent.createChooser(emailIntent, "Send Email"));
-                }
-            }
-        });
-        actionsLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) { //переход на фрагмент с оценкой
-                if (i == 0) {
-                    Fragment fragment = new JustFragment();
-                    FragmentManager fm = getActivity().getSupportFragmentManager();
-                    FragmentTransaction transaction = fm.beginTransaction();
-                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
-                    transaction.commit();
-
-                    Bundle getDataBundle = getArguments(); //получаем данные от предыдущего фрагмента
-                    Bundle passDataBundle = new Bundle(); //передаем данные в слудующий фрагмент
-
-                    passDataBundle.putString("name", getDataBundle.getString("name"));
-                    passDataBundle.putString("post", getDataBundle.getString("post"));
-                    passDataBundle.putString("subdiv", getDataBundle.getString("subdiv"));
-                    passDataBundle.putString("phone", getDataBundle.getString("phone"));
-                    passDataBundle.putString("email", getDataBundle.getString("email"));
-                    if(getDataBundle.getByteArray("photo")!=null){
-                        passDataBundle.putByteArray("photo", getDataBundle.getByteArray("photo"));
-                    }
-                    passDataBundle.putInt("position", getDataBundle.getInt("position", 0));
-                    fragment.setArguments(passDataBundle);
-
-                } else {
-
-                }
-            }
-        });
-
-        callColleagueCB.setOnClickListener(new View.OnClickListener() { //звоним коллеге
-            @Override
-            public void onClick(View view) { //позвонить коллеге
-                if (conArr.get(0).get("Data") != "Данные не заполнены") {
-                    Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + conArr.get(0).get("Data"))); //активность звонка
-                    startActivity(callActivity);
-                }
-            }
-        });
-
-        smsColleagueCB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) { //написать смс коллеге
-                if (conArr.get(0).get("Data") != "Данные не заполнены") {
-                    Intent smsIntent = new Intent(Intent.ACTION_VIEW);
-                    smsIntent.setType("vnd.android-dir/mms-sms");
-                    smsIntent.putExtra("address", conArr.get(0).get("Data"));
-                    smsIntent.putExtra("sms_body", "Здравствуйте!");
-                    startActivity(smsIntent);
-                } else {
-                    Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
-    }
-
-    private void initElemets() {
-        nameTV = (TextView) rootView.findViewById(R.id.name_tv);
-        postTV = (TextView) rootView.findViewById(R.id.post_tv);
-        subdivTV = (TextView) rootView.findViewById(R.id.subdiv_tv);
-        contactLV = (ListView) rootView.findViewById(R.id.lv_contacts);
-        actionsLV = (ListView) rootView.findViewById(R.id.lv_action);
-        callColleagueCB = (CircleButton) rootView.findViewById(R.id.call_colleague_butt);
-        smsColleagueCB = (CircleButton) rootView.findViewById(R.id.sms_colleague_butt);
-        circlePhotoColleague = (CircleImageView) rootView.findViewById(R.id.profile_image);
-        photoBackground = (ImageView) rootView.findViewById(R.id.profile_image_back);
-
-
-
-        contactLV.setBackgroundColor(Color.WHITE);
-        actionsLV.setBackgroundColor(Color.WHITE);
-
-        //ловим данные с предыдущей активности
-        nameTV.setText(getDataBundle.getString("name"));
-        postTV.setText(getDataBundle.getString("post"));
-        subdivTV.setText(getDataBundle.getString("subdiv"));
-        if(getDataBundle.getByteArray("photo")!=null){
-            byte[] photoByte = getDataBundle.getByteArray("photo");
-            Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
-            circlePhotoColleague.setImageBitmap(bm);
-            photoBackground.setImageBitmap(bm);
-        }
-    }
-    private void initAdapter() {
-        HashMap<String, String> map;
-
-        //создаем лист с контактными данными
-        map = new HashMap<String, String>();
-        map.put("Name", "сотовый");
-        if (getDataBundle.getString("phone") != null) {
-            map.put("Data", getDataBundle.getString("phone"));
-        } else {
-            map.put("Data", "Данные не заполнены");
-        }
-        conArr.add(map);
-        try {
-            if (!getDataBundle.getString("email").isEmpty()) {
-                map = new HashMap<String, String>();
-                map.put("Name", "рабочий");
-                map.put("Data", getDataBundle.getString("email"));
-                conArr.add(map);
-            }
-        } catch (NullPointerException ex) {
-            ex.printStackTrace();
-        }
-
-
-        SimpleAdapter adapter = new SimpleAdapter(getActivity(), conArr, android.R.layout.simple_list_item_2,
-                new String[]{"Name", "Data"},
-                new int[]{android.R.id.text1, android.R.id.text2}) {
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-                TextView text2 = (TextView) view.findViewById(android.R.id.text2);
-                text1.setTextColor(Color.parseColor("#76b9f1"));
-                return view;
-            }
-        };
-        contactLV.setAdapter(adapter);
-
-        //лист с действиями
-        String[] actionName = {"Оценить коллегу", "Заказать детальный отчет"};
-        actionsLV.setAdapter(new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_list_item_1, actionName));
-    }
-
     @Override
     public void onBackPressed() {
         FragmentManager fm = getFragmentManager();
         FragmentTransaction tx = fm.beginTransaction();
-        tx.replace( R.id.fragment_container, new ColleagueFragment() ).addToBackStack( "tag" ).commit();
+        tx.replace(R.id.fragment_container, new ColleagueFragment()).addToBackStack("tag").commit();
     }
+
+
 }

@@ -31,7 +31,8 @@
                 android:layout_gravity="center_vertical|end"
                 android:layout_marginRight="16dp"
                 android:textAlignment="textEnd"
-                android:textSize="14sp" />
+                android:gravity="end"
+                android:textSize="18sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -46,7 +47,7 @@
                 android:layout_height="76dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginLeft="16dp"
-                android:src="@drawable/no_photo"
+                android:src="@drawable/photo"
                 app:civ_border_color="#FF000000"
                 app:civ_border_width="1dp" />
 

@@ -19,7 +19,6 @@ import com.example.mtsihr.Fragments.SettingsFragment;
 import com.example.mtsihr.Fragments.ShareFragment;
 import com.example.mtsihr.Interfaces.OnBackPressedListener;
 import com.example.mtsihr.Models.Colleague;
-import com.example.mtsihr.Models.HistoryModel;
 
 import java.util.ArrayList;
 

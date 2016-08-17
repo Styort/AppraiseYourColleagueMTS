@@ -9,7 +9,7 @@
         android:layout_height="56dp"
         android:layout_gravity="center"
         android:layout_marginLeft="22dp"
-        android:src="@drawable/no_photo"
+        android:src="@drawable/photo"
         app:civ_border_color="#FF000000"
         app:civ_border_width="1dp" />
 

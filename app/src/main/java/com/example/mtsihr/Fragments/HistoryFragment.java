@@ -162,9 +162,11 @@ public class HistoryFragment extends Fragment {
             public void afterTextChanged(Editable editable) {
                 String text = searachHistoryEdit.getText().toString().toLowerCase(Locale.getDefault());
                 historyAdapter.filter(text);
+                historyAdapter.notifyDataSetChanged();
             }
         });
     }
+
 
     @Override
     public void onStart() {

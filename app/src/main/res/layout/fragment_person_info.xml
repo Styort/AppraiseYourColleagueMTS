@@ -25,7 +25,7 @@
 
                 <ImageView
                     android:id="@+id/profile_image_back"
-                    android:src="@drawable/no_photo"
+                    android:src="@drawable/photo"
                     android:tint="#CC000000"
                     android:scaleType="centerCrop"
                     android:layout_width="match_parent"
@@ -37,7 +37,7 @@
                     android:layout_height="96dp"
                     android:layout_gravity="center_horizontal|top"
                     android:layout_marginTop="30dp"
-                    android:src="@drawable/no_photo"
+                    android:src="@drawable/photo"
                     app:civ_border_color="#FF000000"
                     app:civ_border_width="2dp" />
 

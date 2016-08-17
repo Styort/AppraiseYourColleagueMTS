@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -138,6 +139,8 @@ public class ColleagueAdapter extends ArrayAdapter {
             Bitmap bm = BitmapFactory.decodeByteArray(colleagueList.get(position).getPhoto(), 0,
                     colleagueList.get(position).getPhoto().length);
             viewHolder.colleaguePhoto.setImageBitmap(bm);
+        }else {
+            viewHolder.colleaguePhoto.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.photo));
         }
         //меняем цвет у стрелочки
         int color = Color.parseColor("#858585"); //The color u want
