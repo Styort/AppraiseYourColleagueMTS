@@ -34,7 +34,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         app:fabSize="normal"
-        app:backgroundTint="@color/colorAccent"
+        app:backgroundTint="@color/colorRed"
         android:src="@drawable/ic_add_white_48dp" />
 
 </RelativeLayout>

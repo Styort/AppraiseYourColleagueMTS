@@ -2,9 +2,11 @@ package com.example.mtsihr.Fragments;
 
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -164,23 +166,31 @@ public class JustFragment extends Fragment {
         sendEvalButt.setOnClickListener(new View.OnClickListener() { //отправка данных
             @Override
             public void onClick(View view) { //отправляем данные и сохраняем в истории
-                realm.beginTransaction();
-                HistoryModel history = realm.createObject(HistoryModel.class);
-                history.setName(name);
-                Date d = new Date();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy hh:mm");
-                history.setPost(post);
-                history.setSubdiv(subdiv);
-                history.setDateOfEval(dateFormat.format(d));
-                history.setCourage(evaluateArr.get(3).eval);
-                history.setCreativity(evaluateArr.get(4).eval);
-                history.setEfficiency(evaluateArr.get(1).eval);
-                history.setOpenness(evaluateArr.get(5).eval);
-                history.setPartnership(evaluateArr.get(0).eval);
-                history.setResponsibility(evaluateArr.get(2).eval);
-                if (photo != null) {
-                    history.setPhoto(photo);
+                SharedPreferences sharedPref = getActivity().getSharedPreferences("settings", 0); //получаем данные с настроек
+                Boolean saveHistory = sharedPref.getBoolean("save_history", false); //проверяем, сохранять ли историю или нет
+
+                if (saveHistory){ //если в настройках включено сохранение, то сохраняем
+                    realm.beginTransaction();
+                    HistoryModel history = realm.createObject(HistoryModel.class);
+                    history.setName(name);
+                    Date d = new Date();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy hh:mm");
+                    history.setPost(post);
+                    history.setSubdiv(subdiv);
+                    history.setDateOfEval(dateFormat.format(d));
+                    history.setCourage(evaluateArr.get(3).eval);
+                    history.setCreativity(evaluateArr.get(4).eval);
+                    history.setEfficiency(evaluateArr.get(1).eval);
+                    history.setOpenness(evaluateArr.get(5).eval);
+                    history.setPartnership(evaluateArr.get(0).eval);
+                    history.setResponsibility(evaluateArr.get(2).eval);
+                    if (photo != null) {
+                        history.setPhoto(photo);
+                    }
+                    realm.commitTransaction();
+                    Toast.makeText(getActivity(), "Данные сохранены в истории!", Toast.LENGTH_SHORT).show();
                 }
+
 
                 int assessment[] = new int[6];
                 for (int i = 0; i < evaluateArr.size(); i++) {
@@ -201,9 +211,6 @@ public class JustFragment extends Fragment {
                             assessment[i] = 0;
                     }
                 }
-                realm.commitTransaction();
-                Toast.makeText(getActivity(), "Данные сохранены в истории!", Toast.LENGTH_SHORT).show();
-
                 Intent emailIntent = new Intent(Intent.ACTION_SEND); //переходим на отправку email
                 emailIntent.setType("text/plain");
                 emailIntent.putExtra(Intent.EXTRA_EMAIL, "prosto_mail@mts.ru"); //кому отправляем

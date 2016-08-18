@@ -4,21 +4,20 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Настройки</string>
     <string name="menu_estimate">Оценить коллегу</string>
     <string name="menu_delete">Удалить</string>
 
+    <string name="share_settings_summary">Пригласить коллегу установить приложение - коллега получит электронное сообщение с сылкой на приложение.</string>
+    <string name="share_settings">Поделиться приложением</string>
+    <string name="menu_style_settings_summary">Настройте внешний вид главного меню под себя!</string>
+    <string name="menu_style_settings">Главное меню</string>
+    <string name="save_history_settings_summary">Сохранять отправленные оценки в память телефона</string>
+    <string name="save_history_settings">Сохранять историю оценок</string>
+    <string name="about_settings">О программе</string>
+    <string name="delete_colleague_settings">Очистить список коллег</string>
+    <string name="delete_history_settings">Очистить историю оценок</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-
-
-    <string name="pref_send_report">Send crash reports</string>
-    <string name="pref_send_report_summary">Helps to fix bugs</string>
-    <string name="pref_sync_frequency">Sync frequency</string>
-    <string name="pref_sync_frequency_summary">Set the sync frequency</string>
-    <string name="pref_user_name">Set username</string>
-    <string name="pref_user_name_summary">Set your username</string>
-
-    <string name="pref_user_profile">User Profile</string>
-    <string name="pref_update_setting">Update Settings</string>
 </resources>
