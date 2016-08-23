@@ -142,6 +142,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignTop="@+id/textView"
             android:layout_marginRight="16dp"
+            android:checked="true"
             android:background="@drawable/toggle_selector"
             android:textOff=""
             android:textOn="" />

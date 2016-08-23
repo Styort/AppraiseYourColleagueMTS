@@ -4,7 +4,8 @@
     android:layout_height="fill_parent">
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
         android:layout_centerVertical="true"
         android:orientation="vertical">
         <LinearLayout
@@ -47,7 +48,8 @@
     <ImageView
         android:id="@+id/ic_eval_iv"
         android:layout_marginRight="16dp"
+        android:layout_gravity="center"
         android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
-        android:layout_width="48dp"
-        android:layout_height="48dp" />
+        android:layout_width="30dp"
+        android:layout_height="30dp" />
 </LinearLayout>

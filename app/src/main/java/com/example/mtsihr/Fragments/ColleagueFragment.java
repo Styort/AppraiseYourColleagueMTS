@@ -4,11 +4,9 @@ package com.example.mtsihr.Fragments;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -34,7 +32,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mtsihr.Adapters.ColleagueAdapter;
-import com.example.mtsihr.Interfaces.OnBackPressedListener;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.R;
 
@@ -51,7 +48,7 @@ import io.realm.RealmResults;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ColleagueFragment extends Fragment implements OnBackPressedListener {
+public class ColleagueFragment extends Fragment {
 
     private Realm realm;
     private ListView colleagueList;
@@ -63,6 +60,7 @@ public class ColleagueFragment extends Fragment implements OnBackPressedListener
     private RealmResults<Colleague> colleagueRealmResults;
     private FragmentTransaction transaction;
     private FloatingActionButton fab;
+    private Bundle getDataBundle;
 
     public ColleagueFragment() {
         // Required empty public constructor
@@ -77,6 +75,7 @@ public class ColleagueFragment extends Fragment implements OnBackPressedListener
         //убираем автооткрытие клавиатуры
         this.getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
+        getDataBundle = getArguments(); //получение данных с предыдущего фрагмента
         realm = Realm.getDefaultInstance();
         colleagues = new ArrayList<>();
 
@@ -149,8 +148,7 @@ public class ColleagueFragment extends Fragment implements OnBackPressedListener
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 transaction = fm.beginTransaction();
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
-                transaction.commit();
+                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
 
                 Bundle bundle = new Bundle();
                 bundle.putString("name", colleagues.get(position).getName());
@@ -190,34 +188,96 @@ public class ColleagueFragment extends Fragment implements OnBackPressedListener
 
 
     private void showInfo() {
-        colleagueList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Fragment fragment = new PersonInfoFragment();
-                FragmentManager fm = getActivity().getSupportFragmentManager();
-                transaction = fm.beginTransaction();
-                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
-                transaction.commit();
+        boolean isShare = false, isJust = false;
+        if (getDataBundle != null) { //получаем данные с предыдущего фрагмента
+            isShare = getDataBundle.getBoolean("share"); //знак о том, что при нажатии на коллегу, мы поделимся с ним приложением
+            isJust = getDataBundle.getBoolean("just"); //знак о том, что при нажатии на коллегу, мы перейдем выбору оценки
+        }
+        if (isShare) { //проверка откуда произошел переход на данный фрагмент
+            //делимся приложением
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Поделиться приложением"); //заголовок тулбара
+            colleagueList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Object origObj = colleagueAdapter.getItem(i);
+                    int position = colleagueAdapter.getPosition(origObj);
+                    //send email
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                    emailIntent.setData(Uri.parse("mailto:")); // only email apps should handle this
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, colleagues.get(position).getEmail());
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
+                    if (emailIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                        startActivity(Intent.createChooser(emailIntent, "Отправить email..."));
+                    }
 
-                Colleague concreteColleague = (Colleague) adapterView.getItemAtPosition(i); //получаем позицию выбранного коллеги
-                // в листе с учетом фильтра
-                //передаем данные о коллеге в фрагмент PersonInfo
-                Bundle bundle = new Bundle();
-                bundle.putString("name", concreteColleague.getName());
-                bundle.putString("post", concreteColleague.getPost());
-                bundle.putString("subdiv", concreteColleague.getSubdivision());
-                bundle.putString("phone", concreteColleague.getPhone());
-                bundle.putString("email", concreteColleague.getEmail());
-                if (concreteColleague.getPhoto() != null) {
-                    bundle.putByteArray("photo", concreteColleague.getPhoto());
+                    /*
+                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                    emailIntent.setType("message/rfc822");
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, colleagues.get(position).getEmail());
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, "");
+
+                    startActivity(Intent.createChooser(emailIntent, "Отправить email...")); */
                 }
-                Object origObj = colleagueAdapter.getItem(i);
-                int position = colleagueAdapter.getPosition(origObj);
-                bundle.putInt("position", position);
-                fragment.setArguments(bundle);
-            }
-        });
+            });
+        } else if (isJust) { //переходим к оценке коллеги
+            colleagueList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Fragment fragment = new JustFragment();
+                    FragmentManager fm = getActivity().getSupportFragmentManager();
+                    transaction = fm.beginTransaction();
+                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
+
+                    Colleague concreteColleague = (Colleague) adapterView.getItemAtPosition(i); //получаем позицию выбранного коллеги
+
+                    Bundle passDataBundle = new Bundle(); //передаем данные в слудующий фрагмент
+
+                    passDataBundle.putString("name", concreteColleague.getName());
+                    passDataBundle.putString("post", concreteColleague.getPost());
+                    passDataBundle.putString("subdiv", concreteColleague.getSubdivision());
+                    passDataBundle.putString("phone", concreteColleague.getPhone());
+                    passDataBundle.putString("email", concreteColleague.getEmail());
+                    if (concreteColleague.getPhoto() != null) {
+                        passDataBundle.putByteArray("photo", concreteColleague.getPhoto());
+                    }
+                    Object origObj = colleagueAdapter.getItem(i);
+                    int position = colleagueAdapter.getPosition(origObj);
+                    passDataBundle.putInt("position", position);
+                    fragment.setArguments(passDataBundle);
+                }
+            });
+        } else {
+            //инфо о коллеге
+            colleagueList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Fragment fragment = new PersonInfoFragment();
+                    FragmentManager fm = getActivity().getSupportFragmentManager();
+                    transaction = fm.beginTransaction();
+                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
+
+                    Colleague concreteColleague = (Colleague) adapterView.getItemAtPosition(i); //получаем позицию выбранного коллеги
+                    // в листе с учетом фильтра
+                    //передаем данные о коллеге в фрагмент PersonInfo
+                    Bundle bundle = new Bundle();
+                    bundle.putString("name", concreteColleague.getName());
+                    bundle.putString("post", concreteColleague.getPost());
+                    bundle.putString("subdiv", concreteColleague.getSubdivision());
+                    bundle.putString("phone", concreteColleague.getPhone());
+                    bundle.putString("email", concreteColleague.getEmail());
+                    if (concreteColleague.getPhoto() != null) {
+                        bundle.putByteArray("photo", concreteColleague.getPhoto());
+                    }
+                    Object origObj = colleagueAdapter.getItem(i);
+                    int position = colleagueAdapter.getPosition(origObj);
+                    bundle.putInt("position", position);
+                    fragment.setArguments(bundle);
+                }
+            });
+        }
     }
 
     private void initAdapter() {
@@ -269,8 +329,8 @@ public class ColleagueFragment extends Fragment implements OnBackPressedListener
                             mPhoneNumber = phones.getString(phones.getColumnIndex(
                                     ContactsContract.CommonDataKinds.Phone.NUMBER));
                             for (Colleague col : colleagues) {
-                                if (col.getPhone()!=null) {
-                                    if (col.getPhone().equals(mPhoneNumber)){
+                                if (col.getPhone() != null) {
+                                    if (col.getPhone().equals(mPhoneNumber)) {
                                         isExists = true;
                                         Toast.makeText(getActivity(), "Коллега уже есть в вашем списке!", Toast.LENGTH_SHORT).show();
                                         break;
@@ -293,7 +353,7 @@ public class ColleagueFragment extends Fragment implements OnBackPressedListener
                                     emails.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
                             for (Colleague col : colleagues) {
                                 if (col.getEmail() != null) {
-                                    if (col.getEmail().equals(mEmail)){
+                                    if (col.getEmail().equals(mEmail)) {
                                         isExists = true;
                                         Toast.makeText(getActivity(), "Коллега уже есть в вашем списке!", Toast.LENGTH_SHORT).show();
                                         break;
@@ -375,9 +435,4 @@ public class ColleagueFragment extends Fragment implements OnBackPressedListener
         });
     }
 
-
-    @Override
-    public void onBackPressed() {
-        getFragmentManager().popBackStack();
-    }
 }

@@ -52,8 +52,8 @@
 
     <ImageView
         android:id="@+id/ic_colleague_iv"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_marginRight="16dp"
         android:layout_gravity="center"
         android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />

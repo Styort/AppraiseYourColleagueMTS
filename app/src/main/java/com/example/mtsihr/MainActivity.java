@@ -1,8 +1,6 @@
 package com.example.mtsihr;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
@@ -16,9 +14,8 @@ import android.view.MenuItem;
 import com.example.mtsihr.Fragments.ColleagueFragment;
 import com.example.mtsihr.Fragments.HelpFragment;
 import com.example.mtsihr.Fragments.HistoryFragment;
+import com.example.mtsihr.Fragments.JustFragment;
 import com.example.mtsihr.Fragments.SettingsFragment;
-import com.example.mtsihr.Fragments.ShareFragment;
-import com.example.mtsihr.Interfaces.OnBackPressedListener;
 import com.example.mtsihr.Models.Colleague;
 
 import java.util.ArrayList;
@@ -48,12 +45,11 @@ public class MainActivity extends AppCompatActivity
         //set the fragment initially
         ColleagueFragment colleagueFragment = new ColleagueFragment();
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, colleagueFragment,"colleagueFrag");
+        fragmentTransaction.replace(R.id.fragment_container, colleagueFragment, "colleagueFrag");
         fragmentTransaction.commit();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -68,19 +64,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        FragmentManager fm = getSupportFragmentManager();
-        OnBackPressedListener backPressedListener = null;
-        for (Fragment fragment: fm.getFragments()) {
-            if (fragment instanceof  OnBackPressedListener) {
-                backPressedListener = (OnBackPressedListener) fragment;
-                break;
-            }
-        }
+        int count = getFragmentManager().getBackStackEntryCount();
 
-        if (backPressedListener != null) {
-            backPressedListener.onBackPressed();
-        } else {
+        if (count == 0) {
             super.onBackPressed();
+            //additional code
+        } else {
+            getFragmentManager().popBackStack();
         }
     }
 
@@ -95,35 +85,48 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(MenuItem item) { //переходим на выбранный фрагмент
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         FragmentTransaction fragmentTransaction;
-        if (id == R.id.nav_colleagues) {
-            ColleagueFragment colleagueFragment = new ColleagueFragment();
-            fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, colleagueFragment, "colleagueFrag");
-            fragmentTransaction.commit();
-        } else if (id == R.id.nav_just) {
-            HistoryFragment historyFragment = new HistoryFragment();
-            fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, historyFragment);
-            fragmentTransaction.commit();
-        } else if (id == R.id.nav_settings) {
-            SettingsFragment settingsFragment = new SettingsFragment();
-            fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, settingsFragment);
-            fragmentTransaction.commit();
-        } else if (id == R.id.nav_help) {
-            HelpFragment helpFragment = new HelpFragment();
-            fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, helpFragment);
-            fragmentTransaction.commit();
-        } else if (id == R.id.nav_share) {
-            ShareFragment shareFragment = new ShareFragment();
-            fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, shareFragment);
-            fragmentTransaction.commit();
+        switch (id) {
+            case R.id.nav_colleagues:
+                ColleagueFragment colleagueFragment = new ColleagueFragment();
+                fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_container, colleagueFragment, "colleagueFrag").addToBackStack(null).commit();
+                break;
+            case R.id.nav_history:
+                HistoryFragment historyFragment = new HistoryFragment();
+                fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_container, historyFragment).addToBackStack(null).commit();
+                break;
+            case R.id.nav_settings:
+                SettingsFragment settingsFragment = new SettingsFragment();
+                fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_container, settingsFragment).addToBackStack(null).commit();
+                break;
+            case R.id.nav_help:
+                HelpFragment helpFragment = new HelpFragment();
+                fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_container, helpFragment).addToBackStack(null).commit();
+                break;
+            case R.id.nav_share:
+                ColleagueFragment fragment = new ColleagueFragment();
+                FragmentManager fm = this.getSupportFragmentManager();
+
+                fragmentTransaction = fm.beginTransaction();
+                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                fragmentTransaction.replace(R.id.fragment_container, fragment).addToBackStack(null).commit();
+
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("share", true); //передаем в фрагмент Share знак, для того, чтобы понять какое действие выполнять там.
+                fragment.setArguments(bundle);
+                break;
+            case R.id.nav_just:
+                JustFragment justFragment = new JustFragment();
+                fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_container, justFragment).addToBackStack(null).commit();
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

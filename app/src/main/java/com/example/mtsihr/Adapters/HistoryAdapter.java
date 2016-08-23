@@ -91,6 +91,7 @@ public class HistoryAdapter extends ArrayAdapter {
         viewHolder.evalHistoryDate.setText(historyEvaluate.get(position).getDateOfEval()); //должность
         //меняем цвет у стрелочки
         int color = Color.parseColor("#858585"); //The color u wantviewHolder.icArrowColleague.setColorFilter(color);
+        viewHolder.icArrowColleague.setColorFilter(color);
 
         if(historyEvaluate.get(position).getPhoto()!=null){ //проверяем, если ли фото у контакта и добавляем фото если есть
             Bitmap bm = BitmapFactory.decodeByteArray(historyEvaluate.get(position).getPhoto(), 0,

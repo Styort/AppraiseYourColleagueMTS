@@ -79,8 +79,7 @@ public class HistoryFragment extends Fragment {
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 transaction = fm.beginTransaction();
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
-                transaction.commit();
+                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
 
                 HistoryModel concreteHistory = (HistoryModel) adapterView.getItemAtPosition(i); //получаем позицию выбранного коллеги
                                                                                                 // в листе с учетом фильтра

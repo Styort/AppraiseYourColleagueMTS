@@ -80,13 +80,15 @@ public class JustFragment extends Fragment {
     }
 
     public void getData() {
-        name = getDataBundle.getString("name");
-        post = getDataBundle.getString("post");
-        subdiv = getDataBundle.getString("subdiv");
-        phone = getDataBundle.getString("phone");
-        email = getDataBundle.getString("email");
-        if (getDataBundle.getByteArray("photo") != null) {
-            photo = getDataBundle.getByteArray("photo");
+        if(getDataBundle!=null){
+            name = getDataBundle.getString("name");
+            post = getDataBundle.getString("post");
+            subdiv = getDataBundle.getString("subdiv");
+            phone = getDataBundle.getString("phone");
+            email = getDataBundle.getString("email");
+            if (getDataBundle.getByteArray("photo") != null) {
+                photo = getDataBundle.getByteArray("photo");
+            }
         }
     }
 
@@ -100,41 +102,53 @@ public class JustFragment extends Fragment {
 
         showColleagueLL.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-
-                Fragment fragment = new PersonInfoFragment();
+            public void onClick(View view) { //переходим к выбору коллеги/к просмотру инфы о коллеге
+                Fragment fragment;
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 FragmentTransaction transaction = fm.beginTransaction();
-                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
-                transaction.commit();
+                Bundle passDataBundle = new Bundle(); //передатчик данных в следующий фрагмент
+                if(getDataBundle!=null){
+                    fragment = new PersonInfoFragment();
+                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
 
+                    passDataBundle.putString("name", name);
+                    passDataBundle.putString("post", post);
+                    passDataBundle.putString("subdiv", subdiv);
+                    passDataBundle.putString("phone", phone);
+                    passDataBundle.putString("email", email);
+                    if (photo != null) {
+                        passDataBundle.putByteArray("photo", photo);
+                    }
+                    passDataBundle.putInt("position", getDataBundle.getInt("position"));
+                    fragment.setArguments(passDataBundle);
+                }else {
+                    fragment = new ColleagueFragment();
+                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
 
-                Bundle passDataBundle = new Bundle(); //передаем данные в слудующий фрагмент
-
-                passDataBundle.putString("name", name);
-                passDataBundle.putString("post", post);
-                passDataBundle.putString("subdiv", subdiv);
-                passDataBundle.putString("phone", phone);
-                passDataBundle.putString("email", email);
-                if (photo != null) {
-                    passDataBundle.putByteArray("photo", photo);
+                    passDataBundle.putBoolean("just", true); //даем знать следующему фрагменту , что нужно выбрать коллегу для оценки
+                    fragment.setArguments(passDataBundle);
                 }
-                passDataBundle.putInt("position", getDataBundle.getInt("position"));
-                fragment.setArguments(passDataBundle);
+
             }
         });
 
         /** получение данных о сотруднике */
         //ловим данные с предыдущей активности
-        nameEvTV.setText(name);
-        postEvTV.setText(post);
-        subdivEvTV.setText(subdiv);
-        if (photo != null) {
-            byte[] photoByte = getDataBundle.getByteArray("photo");
-            Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
-            circlePhotoColleague.setImageBitmap(bm);
+        if(getDataBundle!=null){
+            nameEvTV.setText(name);
+            postEvTV.setText(post);
+            subdivEvTV.setText(subdiv);
+            if (photo != null) {
+                byte[] photoByte = getDataBundle.getByteArray("photo");
+                Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
+                circlePhotoColleague.setImageBitmap(bm);
+            }
+        }else {
+            nameEvTV.setText("Выберите коллегу");
         }
+
 
         evalLV = (ListView) rootView.findViewById(R.id.evaluate_list);
         evaluateArr = new ArrayList<>();
@@ -191,7 +205,6 @@ public class JustFragment extends Fragment {
                     Toast.makeText(getActivity(), "Данные сохранены в истории!", Toast.LENGTH_SHORT).show();
                 }
 
-
                 int assessment[] = new int[6];
                 for (int i = 0; i < evaluateArr.size(); i++) {
                     switch (evaluateArr.get(i).eval) {
@@ -212,7 +225,7 @@ public class JustFragment extends Fragment {
                     }
                 }
                 Intent emailIntent = new Intent(Intent.ACTION_SEND); //переходим на отправку email
-                emailIntent.setType("text/plain");
+                emailIntent.setType("message/rfc822");
                 emailIntent.putExtra(Intent.EXTRA_EMAIL, "prosto_mail@mts.ru"); //кому отправляем
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Оценка [" + name + "," + phone + "]"); //тема письма
                 emailIntent.putExtra(Intent.EXTRA_TEXT, "<Имя>" + name + "</Имя> \n <Телефон>" + phone + "</Телефон> \n " +  //текст письма

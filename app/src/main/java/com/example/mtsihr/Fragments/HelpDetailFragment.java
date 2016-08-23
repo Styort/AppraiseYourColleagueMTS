@@ -3,29 +3,31 @@ package com.example.mtsihr.Fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.mtsihr.R;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Страницы для ViewPager во вкладке Help.
  */
-public class ShareFragment extends Fragment {
+public class HelpDetailFragment extends Fragment {
 
 
-    public ShareFragment() {
+    public HelpDetailFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Поделится"); //заголовок тулбара
-        return inflater.inflate(R.layout.fragment_share, container, false);
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_help_detail, container, false);
+        TextView textView = (TextView) view.findViewById(R.id.detailsText);
+        textView.setText("Page");
+        return view;
     }
 
 }

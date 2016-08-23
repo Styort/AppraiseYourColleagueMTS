@@ -1,22 +1,18 @@
 package com.example.mtsihr.Fragments;
 
 
-import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,12 +22,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.mtsihr.Interfaces.OnBackPressedListener;
 import com.example.mtsihr.MainActivity;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.R;
@@ -47,7 +43,7 @@ import io.realm.RealmResults;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class PersonInfoFragment extends Fragment implements OnBackPressedListener {
+public class PersonInfoFragment extends Fragment {
 
     private View rootView;
     private ListView contactLV, actionsLV;
@@ -123,28 +119,27 @@ public class PersonInfoFragment extends Fragment implements OnBackPressedListene
     }
 
     private void initAdapter() {
-        HashMap<String, String> map;
-
-        //создаем лист с контактными данными
-        map = new HashMap<String, String>();
-        map.put("Name", "сотовый");
-        if (phone != null) {
-            map.put("Data", phone);
-        } else {
-            map.put("Data", "Данные не заполнены");
-        }
-        conArr.add(map);
-        try {
-            if (email != null) {
-                map = new HashMap<String, String>();
-                map.put("Name", "рабочий");
-                map.put("Data", email);
-                conArr.add(map);
+        //создаем HashMap с контактными данными
+        HashMap<String, String> map = new HashMap<String, String>();
+        if (conArr.size() == 0) { //не добавлять больше элементов, если номер телефона и эмейл есть в conArr
+            map.put("Name", "сотовый");
+            if (phone != null) {
+                map.put("Data", phone);
+            } else {
+                map.put("Data", "Данные не заполнены");
             }
-        } catch (NullPointerException ex) {
-            ex.printStackTrace();
+            conArr.add(map);
+            try {
+                if (email != null) {
+                    map = new HashMap<String, String>();
+                    map.put("Name", "рабочий");
+                    map.put("Data", email);
+                    conArr.add(map);
+                }
+            } catch (NullPointerException ex) {
+                ex.printStackTrace();
+            }
         }
-
 
         SimpleAdapter adapter = new SimpleAdapter(getActivity(), conArr, android.R.layout.simple_list_item_2,
                 new String[]{"Name", "Data"},
@@ -157,12 +152,15 @@ public class PersonInfoFragment extends Fragment implements OnBackPressedListene
                 return view;
             }
         };
+
         contactLV.setAdapter(adapter);
 
         //лист с действиями
-        String[] actionName = {"Оценить коллегу", "Заказать детальный отчет"};
-        actionsLV.setAdapter(new ArrayAdapter<String>(getActivity(),
+        String[] actionName = {"Оценить коллегу", "Заказать детальный отчет", "Просмотреть историю оценок"};
+        actionsLV.setAdapter(new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1, actionName));
+        setListViewHeightBasedOnChildren(contactLV); //задаем высоту листу в зависимости от кол-ва его элементов
+        setListViewHeightBasedOnChildren(actionsLV);
     }
 
     private void itemClick() {
@@ -174,55 +172,63 @@ public class PersonInfoFragment extends Fragment implements OnBackPressedListene
                     if (conArr.get(i).get("Data") != "Данные не заполнены") {
                         String phoneNum = conArr.get(i).get("Data");
                         Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNum));
-                        startActivity(callActivity);
+                        startActivity(Intent.createChooser(callActivity, "Позвонить коллеге"));
                     }
                 } else {
                     //send email
                     String email = conArr.get(i).get("Data");
                     Intent emailIntent = new Intent(Intent.ACTION_SEND);
-                    emailIntent.setType("text/plain");
+                    emailIntent.setType("message/rfc822");
                     emailIntent.putExtra(Intent.EXTRA_EMAIL, email);
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
-                    emailIntent.putExtra(Intent.EXTRA_TEXT, "Здравствуйте!");
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, "");
 
-                    startActivity(Intent.createChooser(emailIntent, "Send Email"));
+                    startActivity(Intent.createChooser(emailIntent, "Отправить email..."));
                 }
             }
         });
         actionsLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) { //переход на фрагмент с оценкой
-                if (i == 0) {
-                    Fragment fragment = new JustFragment();
-                    FragmentManager fm = getActivity().getSupportFragmentManager();
-                    FragmentTransaction transaction = fm.beginTransaction();
-                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
-                    transaction.commit();
+                switch (i) {
+                    case 0:
+                        Fragment fragment = new JustFragment();
+                        FragmentManager fm = getActivity().getSupportFragmentManager();
+                        FragmentTransaction transaction = fm.beginTransaction();
+                        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                        transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
 
-                    Bundle getDataBundle = getArguments(); //получаем данные от предыдущего фрагмента
-                    Bundle passDataBundle = new Bundle(); //передаем данные в слудующий фрагмент
+                        Bundle getDataBundle = getArguments(); //получаем данные от предыдущего фрагмента
+                        Bundle passDataBundle = new Bundle(); //передаем данные в слудующий фрагмент
 
-                    passDataBundle.putString("name", name);
-                    passDataBundle.putString("post", post);
-                    passDataBundle.putString("subdiv", subdiv);
-                    passDataBundle.putString("phone", phone);
-                    passDataBundle.putString("email", email);
-                    if (photo != null) {
-                        passDataBundle.putByteArray("photo", photo);
-                    }
-                    passDataBundle.putInt("position", getDataBundle.getInt("position", 0));
-                    fragment.setArguments(passDataBundle);
+                        passDataBundle.putString("name", name);
+                        passDataBundle.putString("post", post);
+                        passDataBundle.putString("subdiv", subdiv);
+                        passDataBundle.putString("phone", phone);
+                        passDataBundle.putString("email", email);
+                        if (photo != null) {
+                            passDataBundle.putByteArray("photo", photo);
+                        }
+                        passDataBundle.putInt("position", getDataBundle.getInt("position", 0));
+                        fragment.setArguments(passDataBundle);
+                        break;
+                    case 1:
+                        //send email
+                        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                        emailIntent.setType("message/rfc822");
+                        emailIntent.putExtra(Intent.EXTRA_EMAIL, "prosto_mail@mts.ru"); //кому отправить
+                        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Детальный отчет по оценке"); //тема письма
+                        emailIntent.putExtra(Intent.EXTRA_TEXT, "<Имя>" + name + "</Имя> \n <Телефон>" + phone + "</Телефон>"); //текст письма
 
-                } else {
-                    //send email
-                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
-                    emailIntent.setType("text/plain");
-                    emailIntent.putExtra(Intent.EXTRA_EMAIL, "prosto_mail@mts.ru"); //кому отправить
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Детальный отчет по оценке"); //тема письма
-                    emailIntent.putExtra(Intent.EXTRA_TEXT, "<Имя>"+name+"</Имя> \n <Телефон>"+phone+"</Телефон>"); //текст письма
-
-                    startActivity(Intent.createChooser(emailIntent, "Send Email"));
+                        startActivity(Intent.createChooser(emailIntent, "Send Email"));
+                        break;
+                    case 2:
+                        Fragment historyFragment = new HistoryFragment();
+                        FragmentManager historyFm = getActivity().getSupportFragmentManager();
+                        FragmentTransaction historyTrans = historyFm.beginTransaction();
+                        historyTrans.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                        historyTrans.replace(((ViewGroup) getView().getParent()).getId(), historyFragment).addToBackStack(null).commit();
+                        break;
                 }
             }
         });
@@ -312,12 +318,23 @@ public class PersonInfoFragment extends Fragment implements OnBackPressedListene
         return (super.onOptionsItemSelected(item));
     }
 
-    @Override
-    public void onBackPressed() {
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction tx = fm.beginTransaction();
-        tx.replace(R.id.fragment_container, new ColleagueFragment()).addToBackStack("tag").commit();
+    public static void setListViewHeightBasedOnChildren(ListView listView) { //выставляем высоту листа в зависимости от кол-ва элементов
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null) {
+            // pre-condition
+            return;
+        }
+
+        int totalHeight = 0;
+        for (int i = 0; i < listAdapter.getCount(); i++) {
+            View listItem = listAdapter.getView(i, null, listView);
+            listItem.measure(0, 0);
+            totalHeight += listItem.getMeasuredHeight();
+        }
+
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
+        listView.requestLayout();
     }
-
-
 }

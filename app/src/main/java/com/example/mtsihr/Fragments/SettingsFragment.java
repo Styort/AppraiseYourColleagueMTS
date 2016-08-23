@@ -122,8 +122,7 @@ public class SettingsFragment extends Fragment {
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 FragmentTransaction transaction = fm.beginTransaction();
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
-                transaction.commit();
+                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
             }
         });
         menuStyleRelative.setOnClickListener(new View.OnClickListener() { //переходим на фрагмент "настройка меню"
@@ -133,19 +132,23 @@ public class SettingsFragment extends Fragment {
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 FragmentTransaction transaction = fm.beginTransaction();
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
-                transaction.commit();
+                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
             }
         });
         shareRelative.setOnClickListener(new View.OnClickListener() { //переходим на фрагмент "поделиться приложением"
             @Override
             public void onClick(View view) {
-                ShareFragment fragment = new ShareFragment();
+                ColleagueFragment fragment = new ColleagueFragment();
                 FragmentManager fm = getActivity().getSupportFragmentManager();
-                FragmentTransaction transaction = fm.beginTransaction();
-                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment);
-                transaction.commit();
+                FragmentTransaction transaction;
+
+                transaction = fm.beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                transaction.replace(R.id.fragment_container, fragment).addToBackStack(null).commit();
+
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("share", true); //передаем в фрагмент Share знак, для того, чтобы понять какое действие выполнять там.
+                fragment.setArguments(bundle);
             }
         });
     }

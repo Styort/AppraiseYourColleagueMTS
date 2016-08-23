@@ -8,6 +8,10 @@
             android:title="Коллеги" />
         <item
             android:id="@+id/nav_just"
+            android:icon="@drawable/ic_check_circle_white_24dp"
+            android:title="Просто" />
+        <item
+            android:id="@+id/nav_history"
             android:icon="@drawable/ic_history_black_24dp"
             android:title="История" />
     </group>
