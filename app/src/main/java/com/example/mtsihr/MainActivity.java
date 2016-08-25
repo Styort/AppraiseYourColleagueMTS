@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity
                 fragment = new ColleagueFragment();
 
                 Bundle bundle = new Bundle();
-                bundle.putBoolean("share", true); 
+                bundle.putBoolean("share", true);
                 fragment.setArguments(bundle);
                 break;
             case R.id.nav_just:
