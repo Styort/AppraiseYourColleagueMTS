@@ -280,5 +280,18 @@
                 android:background="@drawable/text_view_bottom_border"
                 android:textSize="14sp" />
         </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:textSize="18sp"
+            android:text="Комментарий"/>
+        <TextView
+            android:id="@+id/comment_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginBottom="18dp"
+            android:textSize="16sp" />
     </LinearLayout>
 </ScrollView>

@@ -14,8 +14,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.Models.HistoryModel;
@@ -31,10 +31,10 @@ public class SettingsFragment extends Fragment {
     private RealmResults historyRealmResult;
     private View rootView;
     private Button clearHistoryData, clearColleagueData;
-    private ToggleButton historySaveToggle;
+    private Switch historySaveSwitch;
     private SharedPreferences pref;
     private RelativeLayout saveHistRelativeToggleChange, aboutAppRelative,
-            menuStyleRelative, shareRelative;
+            menuStyleRelative, shareRelative, updateRelative;
 
     public SettingsFragment() {
     }
@@ -60,20 +60,21 @@ public class SettingsFragment extends Fragment {
     private void initElements() {
         clearHistoryData = (Button) rootView.findViewById(R.id.delete_history_list_butt);
         clearColleagueData = (Button) rootView.findViewById(R.id.delete_colleague_list_butt);
-        historySaveToggle = (ToggleButton) rootView.findViewById(R.id.history_save_toggle);
+        historySaveSwitch = (Switch) rootView.findViewById(R.id.history_save_switch);
         saveHistRelativeToggleChange = (RelativeLayout) rootView.findViewById(R.id.history_save_relative);
         aboutAppRelative = (RelativeLayout) rootView.findViewById(R.id.about_relative);
         menuStyleRelative = (RelativeLayout) rootView.findViewById(R.id.menu_style_relative);
         shareRelative = (RelativeLayout) rootView.findViewById(R.id.share_relative);
+        updateRelative = (RelativeLayout) rootView.findViewById(R.id.update_relative);
         Boolean saveHistory = pref.getBoolean("save_history", false); //получаем настройку сохранения истории оценок
-        historySaveToggle.setChecked(saveHistory);
+        historySaveSwitch.setChecked(saveHistory);
     }
 
     private void initClicks() {
-        final SharedPreferences.Editor editPref = pref.edit(); //очищаем список коллег
+        final SharedPreferences.Editor editPref = pref.edit();
         clearColleagueData.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view) { //очищаем список коллег
                 realm.beginTransaction();
                 colleagueRealmResults.deleteAllFromRealm(); //удаляем данные из бд
                 realm.commitTransaction();
@@ -93,18 +94,18 @@ public class SettingsFragment extends Fragment {
         saveHistRelativeToggleChange.setOnClickListener(new View.OnClickListener() { //изменение toggleButton при нажатии на Layout и сохранение настроек
             @Override
             public void onClick(View view) {
-                if(historySaveToggle.isChecked()){
-                    historySaveToggle.setChecked(false);
+                if(historySaveSwitch.isChecked()){
+                    historySaveSwitch.setChecked(false);
                     editPref.putBoolean("save_history", true);
                     editPref.commit();
                 }else {
-                    historySaveToggle.setChecked(true);
+                    historySaveSwitch.setChecked(true);
                     editPref.putBoolean("save_history", false);
                     editPref.commit();
                 }
             }
         });
-        historySaveToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        historySaveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) { //обработка клика на toggleButton
                 if (isChecked) {
                     editPref.putBoolean("save_history", true); //сохранять историю
@@ -149,6 +150,18 @@ public class SettingsFragment extends Fragment {
                 Bundle bundle = new Bundle();
                 bundle.putBoolean("share", true); //передаем в фрагмент Share знак, для того, чтобы понять какое действие выполнять там.
                 fragment.setArguments(bundle);
+            }
+        });
+        updateRelative.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                UpdateFragment fragment = new UpdateFragment();
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                FragmentTransaction transaction;
+
+                transaction = fm.beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                transaction.replace(R.id.fragment_container, fragment).addToBackStack(null).commit();
             }
         });
     }

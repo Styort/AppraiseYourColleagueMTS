@@ -12,5 +12,6 @@
     <color name="colorPurple">#8000FF</color>
     <color name="background_holo_dark">#ff000000</color>
     <color name="background_holo_light">#fff3f3f3</color>
+    <color name="colorBlack">#000</color>
 
 </resources>

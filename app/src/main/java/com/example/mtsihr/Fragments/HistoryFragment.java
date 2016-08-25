@@ -45,6 +45,7 @@ public class HistoryFragment extends Fragment {
     private EditText searachHistoryEdit;
     private RealmResults<HistoryModel> historyRealmResults;
     private FragmentTransaction transaction;
+    private Bundle getDataBundle;
 
     public HistoryFragment() {
         // Required empty public constructor
@@ -61,14 +62,38 @@ public class HistoryFragment extends Fragment {
         historyArray = new ArrayList<>();
 
         historyRealmResults = realm.where(HistoryModel.class).findAll(); //считываем все данные что есть в бд
-        historyArray = (ArrayList<HistoryModel>) realm.copyFromRealm(historyRealmResults); //переносим данные в наш лист
+        getDataBundle = getArguments(); //получение данных с предыдущего фрагмента
+        initHistoryArray(); //получаем массив с историей
 
         initElements();
         initAdapter();
         searchFilter();
-        showHistoryInfo();
+        showHistoryInfo(); //показываем фрагмент с информацией об оценке
         registerForContextMenu(historyLV); //создаем контекстное меню для списка истории оценок
         return rootView;
+    }
+
+    private void initHistoryArray() {
+        String email,phone;
+        if(getDataBundle!=null){
+            email = getDataBundle.getString("email");
+            phone = getDataBundle.getString("phone");
+            for (HistoryModel hist: historyRealmResults ) {
+                if(phone!=null){
+                    if (hist.getPhone().equals(phone)){
+                        historyArray.add(hist);
+                    }
+                }else {
+                    if (hist.getEmail().equals(email)){
+                        historyArray.add(hist);
+                    }
+                }
+
+            }
+
+        }else {
+            historyArray = (ArrayList<HistoryModel>) realm.copyFromRealm(historyRealmResults); //переносим данные в наш лист
+        }
     }
 
     private void showHistoryInfo() {
@@ -82,7 +107,7 @@ public class HistoryFragment extends Fragment {
                 transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
 
                 HistoryModel concreteHistory = (HistoryModel) adapterView.getItemAtPosition(i); //получаем позицию выбранного коллеги
-                                                                                                // в листе с учетом фильтра
+                // в листе с учетом фильтра
                 //передаем данные о истории оценки в фрагмент ConcreteHistory
                 Bundle bundle = new Bundle();
                 bundle.putString("name", concreteHistory.getName());
@@ -95,8 +120,9 @@ public class HistoryFragment extends Fragment {
                 bundle.putString("creativity", concreteHistory.getCreativity());
                 bundle.putString("openness", concreteHistory.getOpenness());
                 bundle.putString("date", concreteHistory.getDateOfEval());
-                if(concreteHistory.getPhoto()!=null){
-                    bundle.putByteArray("photo",concreteHistory.getPhoto());
+                bundle.putString("comment", concreteHistory.getComment());
+                if (concreteHistory.getPhoto() != null) {
+                    bundle.putByteArray("photo", concreteHistory.getPhoto());
                 }
 
                 fragment.setArguments(bundle);

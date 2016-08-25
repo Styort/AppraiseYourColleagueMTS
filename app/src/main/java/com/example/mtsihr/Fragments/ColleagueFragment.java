@@ -83,12 +83,12 @@ public class ColleagueFragment extends Fragment {
         colleagues = (ArrayList<Colleague>) realm.copyFromRealm(colleagueRealmResults); //переносим данные в наш лист
 
 
-        initElements();
-        initAdapter();
-        showInfo();
-        fabShowHide();
+        initElements(); //инициализируем элементы view
+        initAdapter(); //инициализируем адаптер
+        showInfo(); //переход на фрагмент PersonInfo
+        fabShowHide(); //скрываем кнопку добавления коллеги при скроле листа
         registerForContextMenu(colleagueList); //создаем контекстное меню для списка коллег
-        searchFilter();
+        searchFilter(); //фильтр поиска
 
         return rootView;
     }
@@ -120,7 +120,7 @@ public class ColleagueFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI); //открываем список контактов
                 startActivityForResult(intent, PICK_CONTACT);
             }
         });
@@ -133,11 +133,11 @@ public class ColleagueFragment extends Fragment {
         inflater.inflate(R.menu.menu_context_colleague, menu);
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
         String title = (String) ((TextView) info.targetView.findViewById(R.id.name)).getText(); //имя коллеги
-        menu.setHeaderTitle(title);
+        menu.setHeaderTitle(title); //добавляем в контекстное меню заголовок с именем коллеги
     }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
+    public boolean onContextItemSelected(MenuItem item) { //обрабатываем нажатия на элементы контекстного меню
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         Object origObj = colleagueAdapter.getItem(info.position); //получаем нажатый обьект в отфильтрованном листе
         int position = colleagueAdapter.getPosition(origObj); //находим позицию объекта origObj в неотфильтрованном листе
@@ -316,7 +316,7 @@ public class ColleagueFragment extends Fragment {
                     String hasPhone = c.getString(c.getColumnIndex(
                             ContactsContract.Contacts.HAS_PHONE_NUMBER));
 
-                    // если есть телефоны, получаем и выводим их
+                    // если есть телефон, получаем его
                     if (hasPhone.equalsIgnoreCase("1")) {
                         Cursor phones = getActivity().getContentResolver().query(
                                 ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -328,7 +328,7 @@ public class ColleagueFragment extends Fragment {
                         while (phones.moveToNext()) {
                             mPhoneNumber = phones.getString(phones.getColumnIndex(
                                     ContactsContract.CommonDataKinds.Phone.NUMBER));
-                            for (Colleague col : colleagues) {
+                            for (Colleague col : colleagues) { //проверка, если ли коллега с данным номером в бд
                                 if (col.getPhone() != null) {
                                     if (col.getPhone().equals(mPhoneNumber)) {
                                         isExists = true;

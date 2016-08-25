@@ -1,14 +1,24 @@
 package com.example.mtsihr;
 
+import android.annotation.TargetApi;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.view.MenuItem;
 
 import com.example.mtsihr.Fragments.ColleagueFragment;
@@ -51,7 +61,6 @@ public class MainActivity extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -60,6 +69,19 @@ public class MainActivity extends AppCompatActivity
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        initSettingsNavDraw();
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private void initSettingsNavDraw() {
+        SharedPreferences sharedPref = this.getSharedPreferences("settings", 0); //получаем данные с настроек
+        int color = sharedPref.getInt("navTextColor", 0);
+        String navBackImageSt = sharedPref.getString("nav_back", ""); //получаем картинку в текстовом формате
+        byte[] imageByteArr = Base64.decode(navBackImageSt, Base64.DEFAULT); //конвертируем строку в массив байтов
+        Bitmap bm = BitmapFactory.decodeByteArray(imageByteArr, 0, imageByteArr.length); //конвертируем массив байтов в изображение
+        BitmapDrawable bmDr = new BitmapDrawable(getResources(), bm);
+        navigationView.setBackground(bmDr);
+        navigationView.setItemTextColor(ColorStateList.valueOf(color));
     }
 
     @Override
@@ -89,44 +111,34 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         FragmentTransaction fragmentTransaction;
+        Fragment fragment = null;
         switch (id) {
             case R.id.nav_colleagues:
-                ColleagueFragment colleagueFragment = new ColleagueFragment();
-                fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, colleagueFragment, "colleagueFrag").addToBackStack(null).commit();
+                fragment = new ColleagueFragment();
                 break;
             case R.id.nav_history:
-                HistoryFragment historyFragment = new HistoryFragment();
-                fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, historyFragment).addToBackStack(null).commit();
+                fragment = new HistoryFragment();
                 break;
             case R.id.nav_settings:
-                SettingsFragment settingsFragment = new SettingsFragment();
-                fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, settingsFragment).addToBackStack(null).commit();
+                fragment = new SettingsFragment();
                 break;
             case R.id.nav_help:
-                HelpFragment helpFragment = new HelpFragment();
-                fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, helpFragment).addToBackStack(null).commit();
+                fragment = new HelpFragment();
                 break;
             case R.id.nav_share:
-                ColleagueFragment fragment = new ColleagueFragment();
-                FragmentManager fm = this.getSupportFragmentManager();
-
-                fragmentTransaction = fm.beginTransaction();
-                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-                fragmentTransaction.replace(R.id.fragment_container, fragment).addToBackStack(null).commit();
+                fragment = new ColleagueFragment();
 
                 Bundle bundle = new Bundle();
-                bundle.putBoolean("share", true); //передаем в фрагмент Share знак, для того, чтобы понять какое действие выполнять там.
+                bundle.putBoolean("share", true); 
                 fragment.setArguments(bundle);
                 break;
             case R.id.nav_just:
-                JustFragment justFragment = new JustFragment();
-                fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, justFragment).addToBackStack(null).commit();
+                fragment = new JustFragment();
                 break;
+        }
+        if (fragment!=null){
+            fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, fragment).addToBackStack(null).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

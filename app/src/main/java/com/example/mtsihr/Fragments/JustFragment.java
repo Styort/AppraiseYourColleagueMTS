@@ -1,6 +1,7 @@
 package com.example.mtsihr.Fragments;
 
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -11,12 +12,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -25,6 +31,7 @@ import android.widget.Toast;
 
 import com.example.mtsihr.Adapters.EvaluateAdapter;
 import com.example.mtsihr.EvaluateActivity;
+import com.example.mtsihr.MainActivity;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.Models.Evaluate;
 import com.example.mtsihr.Models.HistoryModel;
@@ -36,6 +43,7 @@ import java.util.Date;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -52,10 +60,10 @@ public class JustFragment extends Fragment {
     private String[] quality = {"артнерство", "езультативность", "тветственность", "мелость", "ворчество", "ткрытость"};
     private TextView nameEvTV, postEvTV, subdivEvTV;
     private LinearLayout showColleagueLL;
-    private Button sendEvalButt;
     private Bundle getDataBundle;
     private CircleImageView circlePhotoColleague;
     private String name, post, subdiv, phone, email;
+    private EditText commentET;
     private byte[] photo = null;
 
     public JustFragment() {
@@ -74,6 +82,7 @@ public class JustFragment extends Fragment {
         getDataBundle = getArguments(); //получаем данные от предыдущего фрагмента
         getData();
         initElements();
+        setHasOptionsMenu(true); //показываем элемент тулбара "Отпраивть оценку"
         initClicks();
 
         return rootView;
@@ -97,8 +106,8 @@ public class JustFragment extends Fragment {
         postEvTV = (TextView) rootView.findViewById(R.id.post_from_ev);
         subdivEvTV = (TextView) rootView.findViewById(R.id.subdivision_from_ev);
         showColleagueLL = (LinearLayout) rootView.findViewById(R.id.show_colleague_ll);
-        sendEvalButt = (Button) rootView.findViewById(R.id.send_data_button);
         circlePhotoColleague = (CircleImageView) rootView.findViewById(R.id.photo_from_ev);
+        commentET = (EditText) rootView.findViewById(R.id.comment_et);
 
         showColleagueLL.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -177,65 +186,6 @@ public class JustFragment extends Fragment {
                 startActivityForResult(getEvelIntent, 1);
             }
         });
-        sendEvalButt.setOnClickListener(new View.OnClickListener() { //отправка данных
-            @Override
-            public void onClick(View view) { //отправляем данные и сохраняем в истории
-                SharedPreferences sharedPref = getActivity().getSharedPreferences("settings", 0); //получаем данные с настроек
-                Boolean saveHistory = sharedPref.getBoolean("save_history", false); //проверяем, сохранять ли историю или нет
-
-                if (saveHistory){ //если в настройках включено сохранение, то сохраняем
-                    realm.beginTransaction();
-                    HistoryModel history = realm.createObject(HistoryModel.class);
-                    history.setName(name);
-                    Date d = new Date();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy hh:mm");
-                    history.setPost(post);
-                    history.setSubdiv(subdiv);
-                    history.setDateOfEval(dateFormat.format(d));
-                    history.setCourage(evaluateArr.get(3).eval);
-                    history.setCreativity(evaluateArr.get(4).eval);
-                    history.setEfficiency(evaluateArr.get(1).eval);
-                    history.setOpenness(evaluateArr.get(5).eval);
-                    history.setPartnership(evaluateArr.get(0).eval);
-                    history.setResponsibility(evaluateArr.get(2).eval);
-                    if (photo != null) {
-                        history.setPhoto(photo);
-                    }
-                    realm.commitTransaction();
-                    Toast.makeText(getActivity(), "Данные сохранены в истории!", Toast.LENGTH_SHORT).show();
-                }
-
-                int assessment[] = new int[6];
-                for (int i = 0; i < evaluateArr.size(); i++) {
-                    switch (evaluateArr.get(i).eval) {
-                        case "Не соответствует ожиданиям":
-                            assessment[i] = 1;
-                            break;
-                        case "Соответствует ожиданиям":
-                            assessment[i] = 2;
-                            break;
-                        case "Превосходит ожидания":
-                            assessment[i] = 3;
-                            break;
-                        case "Значительно превосходит ожидания":
-                            assessment[i] = 4;
-                            break;
-                        default:
-                            assessment[i] = 0;
-                    }
-                }
-                Intent emailIntent = new Intent(Intent.ACTION_SEND); //переходим на отправку email
-                emailIntent.setType("message/rfc822");
-                emailIntent.putExtra(Intent.EXTRA_EMAIL, "prosto_mail@mts.ru"); //кому отправляем
-                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Оценка [" + name + "," + phone + "]"); //тема письма
-                emailIntent.putExtra(Intent.EXTRA_TEXT, "<Имя>" + name + "</Имя> \n <Телефон>" + phone + "</Телефон> \n " +  //текст письма
-                        "<Партнерство>" + assessment[0] + "</Партнерство> \n <Результативность>" + assessment[1] + "</Результативность>" +
-                        "<Ответственность>" + assessment[2] + "</Ответственность> \n <Смелость>" + assessment[3] + "</Смелость>" +
-                        "<Творчество>" + assessment[4] + "</Творчество> \n <Открытость>" + assessment[5] + "</Открытость>");
-
-                startActivity(Intent.createChooser(emailIntent, "Send Email"));
-            }
-        });
     }
 
     public static void setListViewHeightBasedOnChildren(ListView listView) { //выставляем высоту листа в зависимости от кол-ва элементов
@@ -282,5 +232,78 @@ public class JustFragment extends Fragment {
         super.onStop();
         realm.close();
     }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) { //добавляем меню в тулбар с кнопкой "Удалить коллегу из списка"
+        getActivity().getMenuInflater().inflate(R.menu.send_eval_menu, menu);
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) { //обрабатываем нажатие на элмент тулбара (отправить оценку)
+        switch (item.getItemId()) {
+            case R.id.action_send:
+                SharedPreferences sharedPref = getActivity().getSharedPreferences("settings", 0); //получаем данные с настроек
+                Boolean saveHistory = sharedPref.getBoolean("save_history", false); //проверяем, сохранять ли историю или нет
+
+                if (saveHistory){ //если в настройках включено сохранение, то сохраняем
+                    realm.beginTransaction();
+                    HistoryModel history = realm.createObject(HistoryModel.class);
+                    history.setName(name);
+                    Date d = new Date();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy hh:mm");
+                    history.setPost(post);
+                    history.setSubdiv(subdiv);
+                    history.setDateOfEval(dateFormat.format(d));
+                    history.setCourage(evaluateArr.get(3).eval);
+                    history.setCreativity(evaluateArr.get(4).eval);
+                    history.setEfficiency(evaluateArr.get(1).eval);
+                    history.setOpenness(evaluateArr.get(5).eval);
+                    history.setPartnership(evaluateArr.get(0).eval);
+                    history.setResponsibility(evaluateArr.get(2).eval);
+                    history.setComment(commentET.getText().toString());
+                    history.setPhone(phone);
+                    if(email!=null){
+                        history.setEmail(email);
+                    }
+                    if (photo != null) {
+                        history.setPhoto(photo);
+                    }
+                    realm.commitTransaction();
+                    Toast.makeText(getActivity(), "Данные сохранены в истории!", Toast.LENGTH_SHORT).show();
+                }
+
+                int assessment[] = new int[6];
+                for (int i = 0; i < evaluateArr.size(); i++) {
+                    switch (evaluateArr.get(i).eval) {
+                        case "Не соответствует ожиданиям":
+                            assessment[i] = 1;
+                            break;
+                        case "Соответствует ожиданиям":
+                            assessment[i] = 2;
+                            break;
+                        case "Превосходит ожидания":
+                            assessment[i] = 3;
+                            break;
+                        case "Значительно превосходит ожидания":
+                            assessment[i] = 4;
+                            break;
+                        default:
+                            assessment[i] = 0;
+                    }
+                }
+                Intent emailIntent = new Intent(Intent.ACTION_SEND); //переходим на отправку email
+                emailIntent.setType("message/rfc822");
+                emailIntent.putExtra(Intent.EXTRA_EMAIL, "prosto_mail@mts.ru"); //кому отправляем
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Оценка [" + name + "," + phone + "]"); //тема письма
+                emailIntent.putExtra(Intent.EXTRA_TEXT, "<Имя>" + name + "</Имя> \n <Телефон>" + phone + "</Телефон> \n " +  //текст письма
+                        "<Партнерство>" + assessment[0] + "</Партнерство> \n <Результативность>" + assessment[1] + "</Результативность>" +
+                        "<Ответственность>" + assessment[2] + "</Ответственность> \n <Смелость>" + assessment[3] + "</Смелость>" +
+                        "<Творчество>" + assessment[4] + "</Творчество> \n <Открытость>" + assessment[5] + "</Открытость> +" +
+                        "\n <Комментарий>" + commentET.getText().toString() + "</Комментарий>");
+
+                startActivity(Intent.createChooser(emailIntent, "Send Email"));
+                break;
+        }
+
+        return (super.onOptionsItemSelected(item));
+    }
 }

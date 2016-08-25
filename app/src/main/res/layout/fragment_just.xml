@@ -85,13 +85,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/colorWhite" />
-
-            <Button
-                android:id="@+id/send_data_button"
-                android:layout_marginBottom="18dp"
+            <EditText
+                android:id="@+id/comment_iv"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="Отправить"/>
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:hint="Введите комментарий к оценке..."/>
+            <Button
+                android:id="@+id/eval_photo_butt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Выберите фото"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

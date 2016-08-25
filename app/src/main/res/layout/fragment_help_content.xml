@@ -2,11 +2,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.mtsihr.Fragments.AboutAppFragment">
+    tools:context="com.example.mtsihr.Fragments.HelpContentFragment">
 
-    <ImageView
+    <ListView
+        android:id="@+id/help_content_lv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/photo"
-        android:id="@+id/blur_iv"/>
+        android:layout_height="wrap_content"></ListView>
+
 </FrameLayout>

@@ -1,13 +1,65 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context="com.example.mtsihr.Fragments.MenuStyleSettingsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
+        android:layout_margin="16dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
-
-</FrameLayout>
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:text="Цвет текста"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="36dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Выберите цвет текста главного меню:"
+                android:id="@+id/textView5"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+            <TextView
+                android:id="@+id/chooseColorTV"
+                android:gravity="right"
+                android:layout_gravity="end"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@color/colorBlack"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+        </RelativeLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="18sp"
+            android:text="Обои"/>
+        <Button
+            android:id="@+id/choose_image_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Сменить картинку меню"/>
+        <ImageView
+            android:id="@+id/nav_draw_image_settings"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:src="@drawable/nav_draw_back"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:text="Размытие"
+            />
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/seek_bar_settings"/>
+    </LinearLayout>
+</ScrollView>

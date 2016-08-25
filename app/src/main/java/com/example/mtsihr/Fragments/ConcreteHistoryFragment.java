@@ -24,11 +24,13 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * A simple {@link Fragment} subclass.
  */
 public class ConcreteHistoryFragment extends Fragment {
-
+    public static final String ARG_TEXT = "item_text";
+    public static final String ARG_POSITION = "item_position";
+    public static final String ARG_COUNT = "item_count";
     private View rootView;
     private TextView  partnershipTV, efficiencyTV, responsibilityTV,
             courageTV, creativityTV, opennessTV, nameCollTV, dateOfEvalTV,
-            postCollTV, subdivCollTV;
+            postCollTV, subdivCollTV, commentTV;
     private Bundle getDataBundle;
     private CircleImageView colleagueCirclePhoto;
     public ConcreteHistoryFragment() {
@@ -59,6 +61,7 @@ public class ConcreteHistoryFragment extends Fragment {
         dateOfEvalTV = (TextView) rootView.findViewById(R.id.concrete_hist_date_tv);
         postCollTV = (TextView) rootView.findViewById(R.id.post_concr_hist_tv);
         subdivCollTV = (TextView) rootView.findViewById(R.id.subdivision_concr_hist_tv);
+        commentTV = (TextView) rootView.findViewById(R.id.comment_tv);
         colleagueCirclePhoto = (CircleImageView) rootView.findViewById(R.id.photo_concr_hist_civ);
 
         //заполнение полей данными
@@ -72,6 +75,7 @@ public class ConcreteHistoryFragment extends Fragment {
         courageTV.setText(getDataBundle.getString("courage"));
         creativityTV.setText(getDataBundle.getString("creativity"));
         opennessTV.setText(getDataBundle.getString("openness"));
+        commentTV.setText(getDataBundle.getString("comment"));
         if(getDataBundle.getByteArray("photo")!=null){
             byte[] photoByte = getDataBundle.getByteArray("photo");
             Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);

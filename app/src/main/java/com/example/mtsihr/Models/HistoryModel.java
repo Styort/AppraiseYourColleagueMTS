@@ -8,8 +8,45 @@ import io.realm.RealmObject;
  * Created by Виктор on 15.08.2016.
  */
 public class HistoryModel extends RealmObject {
-    String partnership, efficiency, responsibility, courage, creativity, openness, name, dateOfEval, post, subdiv;
+    String partnership;
+    String efficiency;
+    String responsibility;
+    String courage;
+    String creativity;
+    String openness;
+    String name;
+    String dateOfEval;
+    String post;
+    String subdiv;
+    String email;
+    String phone;
+    String comment;
     byte[] photo;
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
 
     public byte[] getPhoto() {
         return photo;

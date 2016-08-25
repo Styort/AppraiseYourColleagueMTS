@@ -1,6 +1,7 @@
 package com.example.mtsihr.Fragments;
 
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -19,6 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -28,6 +30,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mtsihr.Blur;
 import com.example.mtsihr.MainActivity;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.R;
@@ -39,7 +42,6 @@ import at.markushi.ui.CircleButton;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
 import io.realm.RealmResults;
-
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -56,6 +58,7 @@ public class PersonInfoFragment extends Fragment {
     private ImageView photoBackground;
     private String name, post, subdiv, phone, email;
     private byte[] photo = null;
+    private Blur blur = new Blur();
 
     public PersonInfoFragment() {
         // Required empty public constructor
@@ -72,11 +75,10 @@ public class PersonInfoFragment extends Fragment {
         realm = Realm.getDefaultInstance();
         setHasOptionsMenu(true);
         getDataBundle = getArguments(); //получение данных с предыдущего фрагмента
-        getData();
-        initElemets();
-        initAdapter();
-        itemClick();
-
+        getData(); //получаем данные с предыдещего фрагмента
+        initElemets(); //инициализируем элементы View
+        initAdapter(); //инициализируем адаптеры
+        itemClick(); //инициализируем нажатие на элементы
         return rootView;
     }
 
@@ -102,7 +104,6 @@ public class PersonInfoFragment extends Fragment {
         circlePhotoColleague = (CircleImageView) rootView.findViewById(R.id.profile_image);
         photoBackground = (ImageView) rootView.findViewById(R.id.profile_image_back);
 
-
         contactLV.setBackgroundColor(Color.WHITE);
         actionsLV.setBackgroundColor(Color.WHITE);
 
@@ -114,8 +115,13 @@ public class PersonInfoFragment extends Fragment {
             byte[] photoByte = photo;
             Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
             circlePhotoColleague.setImageBitmap(bm);
-            photoBackground.setImageBitmap(bm);
+            photoBackground.setImageBitmap(blur.fastblur(bm,1,10));
+        }else {
+            Bitmap photo = BitmapFactory.decodeResource(getContext().getResources(),
+                    R.drawable.photo);
+            photoBackground.setImageBitmap(blur.fastblur(photo,1,20));
         }
+
     }
 
     private void initAdapter() {
@@ -124,14 +130,14 @@ public class PersonInfoFragment extends Fragment {
         if (conArr.size() == 0) { //не добавлять больше элементов, если номер телефона и эмейл есть в conArr
             map.put("Name", "сотовый");
             if (phone != null) {
-                map.put("Data", phone);
+                map.put("Data", phone); //получаем номер телефона
             } else {
-                map.put("Data", "Данные не заполнены");
+                map.put("Data", "Данные не заполнены"); //номер телефона не заполнен
             }
             conArr.add(map);
             try {
-                if (email != null) {
-                    map = new HashMap<String, String>();
+                if (email != null) { //получаем email
+                    map = new HashMap<>();
                     map.put("Name", "рабочий");
                     map.put("Data", email);
                     conArr.add(map);
@@ -147,8 +153,8 @@ public class PersonInfoFragment extends Fragment {
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-                TextView text2 = (TextView) view.findViewById(android.R.id.text2);
-                text1.setTextColor(Color.parseColor("#76b9f1"));
+                //TextView text2 = (TextView) view.findViewById(android.R.id.text2);
+                text1.setTextColor(Color.parseColor("#76b9f1")); //назначаем цвет первому textView
                 return view;
             }
         };
@@ -168,13 +174,13 @@ public class PersonInfoFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) { //реализация клика на телефон или email
                 //choose app for call
-                if (i == 0) {
+                if (i == 0) { //если нажат первый элемент списка
                     if (conArr.get(i).get("Data") != "Данные не заполнены") {
                         String phoneNum = conArr.get(i).get("Data");
                         Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNum));
                         startActivity(Intent.createChooser(callActivity, "Позвонить коллеге"));
                     }
-                } else {
+                } else { //если нажат второй элемент списка
                     //send email
                     String email = conArr.get(i).get("Data");
                     Intent emailIntent = new Intent(Intent.ACTION_SEND);
@@ -191,7 +197,7 @@ public class PersonInfoFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) { //переход на фрагмент с оценкой
                 switch (i) {
-                    case 0:
+                    case 0: //нажат элемент "Оценить коллегу"
                         Fragment fragment = new JustFragment();
                         FragmentManager fm = getActivity().getSupportFragmentManager();
                         FragmentTransaction transaction = fm.beginTransaction();
@@ -212,8 +218,7 @@ public class PersonInfoFragment extends Fragment {
                         passDataBundle.putInt("position", getDataBundle.getInt("position", 0));
                         fragment.setArguments(passDataBundle);
                         break;
-                    case 1:
-                        //send email
+                    case 1: //Нажат элемент "Заказать детальный отчет"
                         Intent emailIntent = new Intent(Intent.ACTION_SEND);
                         emailIntent.setType("message/rfc822");
                         emailIntent.putExtra(Intent.EXTRA_EMAIL, "prosto_mail@mts.ru"); //кому отправить
@@ -222,12 +227,20 @@ public class PersonInfoFragment extends Fragment {
 
                         startActivity(Intent.createChooser(emailIntent, "Send Email"));
                         break;
-                    case 2:
+                    case 2: //Нажат элемент история оценок
                         Fragment historyFragment = new HistoryFragment();
                         FragmentManager historyFm = getActivity().getSupportFragmentManager();
                         FragmentTransaction historyTrans = historyFm.beginTransaction();
                         historyTrans.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                         historyTrans.replace(((ViewGroup) getView().getParent()).getId(), historyFragment).addToBackStack(null).commit();
+
+                        Bundle passHistCollDataBundle = new Bundle(); //передаем данные в слудующий фрагмент
+
+                        passHistCollDataBundle.putString("phone", phone);
+                        if(email!=null){
+                            passHistCollDataBundle.putString("email", email);
+                        }
+                        historyFragment.setArguments(passHistCollDataBundle);
                         break;
                 }
             }
@@ -236,10 +249,10 @@ public class PersonInfoFragment extends Fragment {
         callColleagueCB.setOnClickListener(new View.OnClickListener() { //звоним коллеге
             @Override
             public void onClick(View view) { //позвонить коллеге
-                if (conArr.get(0).get("Data") != "Данные не заполнены") {
+                if (conArr.get(0).get("Data") != "Данные не заполнены") { //Если есть номер телефона, то звоним.
                     Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + conArr.get(0).get("Data"))); //активность звонка
                     startActivity(callActivity);
-                } else {
+                } else { //Если нет номера, показываем сообщение об этом
                     Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -248,13 +261,13 @@ public class PersonInfoFragment extends Fragment {
         smsColleagueCB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) { //написать смс коллеге
-                if (conArr.get(0).get("Data") != "Данные не заполнены") {
+                if (conArr.get(0).get("Data") != "Данные не заполнены") { //если есть номер телефона, переходим к смс.
                     Intent smsIntent = new Intent(Intent.ACTION_VIEW);
                     smsIntent.setType("vnd.android-dir/mms-sms");
                     smsIntent.putExtra("address", conArr.get(0).get("Data"));
                     smsIntent.putExtra("sms_body", "Здравствуйте!");
                     startActivity(smsIntent);
-                } else {
+                } else { //Если нет номера, показываем сообщение об этом
                     Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
                 }
 
@@ -263,7 +276,7 @@ public class PersonInfoFragment extends Fragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) { //добавляем меню в тулбар с кнопкой "Удалить коллегу из списка"
         getActivity().getMenuInflater().inflate(R.menu.person_info_menu, menu);
     }
 
@@ -281,22 +294,21 @@ public class PersonInfoFragment extends Fragment {
 
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) { //обрабатываем нажатие на элмент тулбара
         switch (item.getItemId()) {
             case R.id.action_delete:
-                AlertDialog.Builder alert = new AlertDialog.Builder(
-                        getActivity());
+                AlertDialog.Builder alert = new AlertDialog.Builder(getActivity()); //показываем диалоговое окно
                 alert.setMessage("Удалить коллегу из списка?");
                 alert.setPositiveButton("Да", new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Bundle getDataBundle = getArguments();
-                        int pos = getDataBundle.getInt("position", 0);
+                        int pos = getDataBundle.getInt("position", 0); //позиция коллеги в бд
                         RealmResults<Colleague> colleagueRealmResults = realm
-                                .where(Colleague.class).findAll();
+                                .where(Colleague.class).findAll(); //получаем список элементов в бд
                         realm.beginTransaction();
-                        colleagueRealmResults.deleteFromRealm(pos);
+                        colleagueRealmResults.deleteFromRealm(pos); //удаляем коллегу из бд
                         realm.commitTransaction();
 
                         dialog.dismiss();
