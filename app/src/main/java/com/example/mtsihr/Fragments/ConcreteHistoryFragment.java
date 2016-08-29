@@ -82,11 +82,14 @@ public class ConcreteHistoryFragment extends Fragment {
             colleagueCirclePhoto.setImageBitmap(bm);
         }
 
-        ArrayList<TextView> arrTVcolor = new ArrayList<>(); //массив TextView для проставления нужного цвета
-        arrTVcolor.addAll(Arrays.asList(partnershipTV,efficiencyTV,responsibilityTV,creativityTV,opennessTV,courageTV)); //добавление textView
+        //массив TextView для проставления нужного цвета
+        ArrayList<TextView> arrTVcolor = new ArrayList<>();
+        //добавление всех textView в массив
+        arrTVcolor.addAll(Arrays.asList(partnershipTV,efficiencyTV,responsibilityTV,creativityTV,opennessTV,courageTV));
 
         for (int i = 0; i < arrTVcolor.size() ; i++) {
-            switch (arrTVcolor.get(i).getText().toString()) { //цвет шрифта в соответствии с выбранной оценкой
+            //цвет шрифта textview в соответствии с выбранной оценкой
+            switch (arrTVcolor.get(i).getText().toString()) {
                 case "Не соответствует ожиданиям":
                     arrTVcolor.get(i).setTextColor(ContextCompat.getColor(getActivity(), R.color.colorOrange));
                     break;

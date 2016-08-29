@@ -89,13 +89,15 @@ public class HelpFragment extends Fragment {
         }
     }
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) { //добавляем меню в тулбар с кнопкой "Удалить коллегу из списка"
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        //добавляем в тулбар кнопку с быстрым переходом на страницы
         getActivity().getMenuInflater().inflate(R.menu.helo_info_menu, menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) { //обрабатываем нажатие на элмент тулбара (отправить оценку)
+    public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            //обрабатываем нажатие на элмент тулбара (переход на фрагмент со списом страниц)
             case R.id.action_help_info:
                 Fragment fragment = new HelpContentFragment();
                 FragmentManager fm = getActivity().getSupportFragmentManager();

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -23,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -64,32 +66,34 @@ public class JustFragment extends Fragment {
     private CircleImageView circlePhotoColleague;
     private String name, post, subdiv, phone, email;
     private EditText commentET;
+    private ImageView justBackgrIV;
     private byte[] photo = null;
 
     public JustFragment() {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_just, container, false);
 
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("ПРОСТО"); //заголовок тулбара
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("ПРОСТО");
 
         realm.getDefaultInstance();
-        getDataBundle = getArguments(); //получаем данные от предыдущего фрагмента
+        //получаем данные с предыдущего фрагмента
+        getDataBundle = getArguments();
         getData();
         initElements();
-        setHasOptionsMenu(true); //показываем элемент тулбара "Отпраивть оценку"
+        //показываем элемент тулбара "Отпраивть оценку"
+        setHasOptionsMenu(true);
         initClicks();
 
         return rootView;
     }
 
     public void getData() {
-        if(getDataBundle!=null){
+        if (getDataBundle != null) {
             name = getDataBundle.getString("name");
             post = getDataBundle.getString("post");
             subdiv = getDataBundle.getString("subdiv");
@@ -108,15 +112,19 @@ public class JustFragment extends Fragment {
         showColleagueLL = (LinearLayout) rootView.findViewById(R.id.show_colleague_ll);
         circlePhotoColleague = (CircleImageView) rootView.findViewById(R.id.photo_from_ev);
         commentET = (EditText) rootView.findViewById(R.id.comment_et);
+        justBackgrIV = (ImageView) rootView.findViewById(R.id.just_bg_iv);
+        getRandomBackgroundImg();
 
         showColleagueLL.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { //переходим к выбору коллеги/к просмотру инфы о коллеге
+            //переходим к выбору коллеги/к просмотру инфы о коллеге
+            public void onClick(View view) {
                 Fragment fragment;
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 FragmentTransaction transaction = fm.beginTransaction();
-                Bundle passDataBundle = new Bundle(); //передатчик данных в следующий фрагмент
-                if(getDataBundle!=null){
+                //передаем данные в следующий фрагмент
+                Bundle passDataBundle = new Bundle();
+                if (getDataBundle != null) {
                     fragment = new PersonInfoFragment();
                     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
@@ -131,12 +139,13 @@ public class JustFragment extends Fragment {
                     }
                     passDataBundle.putInt("position", getDataBundle.getInt("position"));
                     fragment.setArguments(passDataBundle);
-                }else {
+                } else {
                     fragment = new ColleagueFragment();
                     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
 
-                    passDataBundle.putBoolean("just", true); //даем знать следующему фрагменту , что нужно выбрать коллегу для оценки
+                    //даем знак следующему фрагменту , что нужно выбрать коллегу для оценки, а не перейти на его инфо.
+                    passDataBundle.putBoolean("just", true);
                     fragment.setArguments(passDataBundle);
                 }
 
@@ -145,7 +154,7 @@ public class JustFragment extends Fragment {
 
         /** получение данных о сотруднике */
         //ловим данные с предыдущей активности
-        if(getDataBundle!=null){
+        if (getDataBundle != null) {
             nameEvTV.setText(name);
             postEvTV.setText(post);
             subdivEvTV.setText(subdiv);
@@ -154,7 +163,7 @@ public class JustFragment extends Fragment {
                 Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
                 circlePhotoColleague.setImageBitmap(bm);
             }
-        }else {
+        } else {
             nameEvTV.setText("Выберите коллегу");
         }
 
@@ -169,6 +178,17 @@ public class JustFragment extends Fragment {
         setListViewHeightBasedOnChildren(evalLV);
     }
 
+    public void getRandomBackgroundImg() {
+        int[] images = new int[]{R.drawable.just_1, R.drawable.just_2, R.drawable.just_3,
+                R.drawable.just_4, R.drawable.just_5, R.drawable.just_6};
+
+        // Get a random between 0 and images.length-1
+        int imageId = (int) (Math.random() * images.length);
+
+        // Set the image
+        justBackgrIV.setBackgroundResource(images[imageId]);
+    }
+
     private void initAdapter() {
         evaluateAdapter = new EvaluateAdapter(getActivity(), R.layout.evaluate_list_item, evaluateArr);
         evalLV.setAdapter(evaluateAdapter);
@@ -176,9 +196,10 @@ public class JustFragment extends Fragment {
     }
 
     private void initClicks() {
+        //переход к выбору оценки
         evalLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) { //переход к выбору оценки
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent getEvelIntent = new Intent(getContext(), EvaluateActivity.class);
                 getEvelIntent.putExtra("evalName", firstSymbol[i] + quality[i]);
                 getEvelIntent.putExtra("position", i);
@@ -188,7 +209,8 @@ public class JustFragment extends Fragment {
         });
     }
 
-    public static void setListViewHeightBasedOnChildren(ListView listView) { //выставляем высоту листа в зависимости от кол-ва элементов
+    //выставляем высоту листа в зависимости от кол-ва элементов
+    public static void setListViewHeightBasedOnChildren(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) {
             // pre-condition
@@ -232,19 +254,24 @@ public class JustFragment extends Fragment {
         super.onStop();
         realm.close();
     }
+
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) { //добавляем меню в тулбар с кнопкой "Удалить коллегу из списка"
+    //добавляем меню в тулбар с кнопкой "Удалить коллегу из списка"
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         getActivity().getMenuInflater().inflate(R.menu.send_eval_menu, menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) { //обрабатываем нажатие на элмент тулбара (отправить оценку)
+    public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_send:
-                SharedPreferences sharedPref = getActivity().getSharedPreferences("settings", 0); //получаем данные с настроек
-                Boolean saveHistory = sharedPref.getBoolean("save_history", false); //проверяем, сохранять ли историю или нет
+                //обрабатываем нажатие на элмент тулбара (отправить оценку)
+                SharedPreferences sharedPref = getActivity().getSharedPreferences("settings", 0);
+                //проверяем, сохранять историю или нет
+                Boolean saveHistory = sharedPref.getBoolean("save_history", true);
 
-                if (saveHistory){ //если в настройках включено сохранение, то сохраняем
+                //если в настройках включено сохранение, то сохраняем
+                if (saveHistory) {
                     realm.beginTransaction();
                     HistoryModel history = realm.createObject(HistoryModel.class);
                     history.setName(name);
@@ -259,9 +286,13 @@ public class JustFragment extends Fragment {
                     history.setOpenness(evaluateArr.get(5).eval);
                     history.setPartnership(evaluateArr.get(0).eval);
                     history.setResponsibility(evaluateArr.get(2).eval);
-                    history.setComment(commentET.getText().toString());
+                    if (commentET.getText() != null) {
+                        history.setComment(commentET.getText().toString());
+                    } else {
+                        commentET.setText("");
+                    }
                     history.setPhone(phone);
-                    if(email!=null){
+                    if (email != null) {
                         history.setEmail(email);
                     }
                     if (photo != null) {
@@ -290,9 +321,10 @@ public class JustFragment extends Fragment {
                             assessment[i] = 0;
                     }
                 }
-                Intent emailIntent = new Intent(Intent.ACTION_SEND); //переходим на отправку email
-                emailIntent.setType("message/rfc822");
-                emailIntent.putExtra(Intent.EXTRA_EMAIL, "prosto_mail@mts.ru"); //кому отправляем
+                //переходим на отправку email
+                Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                emailIntent.setData(Uri.parse("mailto:"));
+                emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"prosto_mail@mts.ru"}); //кому отправляем
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Оценка [" + name + "," + phone + "]"); //тема письма
                 emailIntent.putExtra(Intent.EXTRA_TEXT, "<Имя>" + name + "</Имя> \n <Телефон>" + phone + "</Телефон> \n " +  //текст письма
                         "<Партнерство>" + assessment[0] + "</Партнерство> \n <Результативность>" + assessment[1] + "</Результативность>" +
@@ -300,7 +332,9 @@ public class JustFragment extends Fragment {
                         "<Творчество>" + assessment[4] + "</Творчество> \n <Открытость>" + assessment[5] + "</Открытость> +" +
                         "\n <Комментарий>" + commentET.getText().toString() + "</Комментарий>");
 
-                startActivity(Intent.createChooser(emailIntent, "Send Email"));
+                if (emailIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivity(Intent.createChooser(emailIntent, "Отправить email..."));
+                }
                 break;
         }
 

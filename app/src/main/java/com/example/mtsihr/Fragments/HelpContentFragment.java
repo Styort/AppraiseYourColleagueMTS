@@ -36,7 +36,7 @@ public class HelpContentFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_help_content, container, false);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Содержание"); //заголовок тулбара
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Содержание");
 
         contentLV = (ListView) rootView.findViewById(R.id.help_content_lv);
 

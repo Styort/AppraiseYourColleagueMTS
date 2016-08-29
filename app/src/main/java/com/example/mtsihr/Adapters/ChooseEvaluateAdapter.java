@@ -50,7 +50,8 @@ public class ChooseEvaluateAdapter extends ArrayAdapter {
         }
 
         viewHolder.chooseEval.setText((evaluateList.get(position).evaluate));
-        switch (evaluateList.get(position).evaluate) { //цвет бокового лэйаута в соответствии с надписью
+        //цвет бокового лэйаута в соответствии с надписью
+        switch (evaluateList.get(position).evaluate) {
             case "Не соответствует ожиданиям":
                 viewHolder.tvColorEval.setBackgroundColor(ContextCompat.getColor(context, R.color.colorOrange));
                 break;

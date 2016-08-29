@@ -33,7 +33,7 @@ public class SettingsFragment extends Fragment {
     private Button clearHistoryData, clearColleagueData;
     private Switch historySaveSwitch;
     private SharedPreferences pref;
-    private RelativeLayout saveHistRelativeToggleChange, aboutAppRelative,
+    private RelativeLayout aboutAppRelative,
             menuStyleRelative, shareRelative, updateRelative;
 
     public SettingsFragment() {
@@ -44,11 +44,12 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_settings, container, false);
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Настройки"); //заголовок тулбара
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Настройки");
 
         realm = Realm.getDefaultInstance();
-        colleagueRealmResults = realm.where(Colleague.class).findAll(); //считываем все данные, что есть в бд
-        historyRealmResult = realm.where(HistoryModel.class).findAll(); //считыввем всю историю оценок, что есть в бд
+        //считываем все данные, что есть в бд
+        colleagueRealmResults = realm.where(Colleague.class).findAll();
+        historyRealmResult = realm.where(HistoryModel.class).findAll();
         pref = getActivity().getSharedPreferences("settings", 0);
 
 
@@ -61,61 +62,54 @@ public class SettingsFragment extends Fragment {
         clearHistoryData = (Button) rootView.findViewById(R.id.delete_history_list_butt);
         clearColleagueData = (Button) rootView.findViewById(R.id.delete_colleague_list_butt);
         historySaveSwitch = (Switch) rootView.findViewById(R.id.history_save_switch);
-        saveHistRelativeToggleChange = (RelativeLayout) rootView.findViewById(R.id.history_save_relative);
         aboutAppRelative = (RelativeLayout) rootView.findViewById(R.id.about_relative);
         menuStyleRelative = (RelativeLayout) rootView.findViewById(R.id.menu_style_relative);
         shareRelative = (RelativeLayout) rootView.findViewById(R.id.share_relative);
         updateRelative = (RelativeLayout) rootView.findViewById(R.id.update_relative);
-        Boolean saveHistory = pref.getBoolean("save_history", false); //получаем настройку сохранения истории оценок
+        //получаем настройку сохранения истории оценок
+        Boolean saveHistory = pref.getBoolean("save_history", true);
         historySaveSwitch.setChecked(saveHistory);
     }
 
     private void initClicks() {
         final SharedPreferences.Editor editPref = pref.edit();
+        //очищаем список коллег
         clearColleagueData.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { //очищаем список коллег
+            public void onClick(View view) {
                 realm.beginTransaction();
-                colleagueRealmResults.deleteAllFromRealm(); //удаляем данные из бд
+                //удаляем данные из бд
+                colleagueRealmResults.deleteAllFromRealm();
                 realm.commitTransaction();
                 Toast.makeText(getActivity(),"Список коллег очищен!",Toast.LENGTH_SHORT).show();
             }
         });
+        //очищаем историю оценок
         clearHistoryData.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { //очищаем историю оценок
+            public void onClick(View view) {
                 realm.beginTransaction();
-                historyRealmResult.deleteAllFromRealm(); //удаляем данные из бд
+                //удаляем данные из бд
+                historyRealmResult.deleteAllFromRealm();
                 realm.commitTransaction();
                 Toast.makeText(getActivity(),"История оценок очищена!",Toast.LENGTH_SHORT).show();
             }
         });
 
-        saveHistRelativeToggleChange.setOnClickListener(new View.OnClickListener() { //изменение toggleButton при нажатии на Layout и сохранение настроек
-            @Override
-            public void onClick(View view) {
-                if(historySaveSwitch.isChecked()){
-                    historySaveSwitch.setChecked(false);
+        historySaveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    //сохранять историю
                     editPref.putBoolean("save_history", true);
                     editPref.commit();
-                }else {
-                    historySaveSwitch.setChecked(true);
+                } else {
+                    //не сохранять историю
                     editPref.putBoolean("save_history", false);
                     editPref.commit();
                 }
             }
         });
-        historySaveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) { //обработка клика на toggleButton
-                if (isChecked) {
-                    editPref.putBoolean("save_history", true); //сохранять историю
-                    editPref.commit();
-                } else {
-                    editPref.putBoolean("save_history", false); //не сохранять историю
-                    editPref.commit();
-                }
-            }
-        });
+        //переходим на фрагмент "О приложении"
         aboutAppRelative.setOnClickListener(new View.OnClickListener() { //переходим на фрагмент "о приложении"
             @Override
             public void onClick(View view) {
@@ -126,6 +120,7 @@ public class SettingsFragment extends Fragment {
                 transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
             }
         });
+        //переходим на фрагмент настройки меню
         menuStyleRelative.setOnClickListener(new View.OnClickListener() { //переходим на фрагмент "настройка меню"
             @Override
             public void onClick(View view) {
@@ -136,6 +131,7 @@ public class SettingsFragment extends Fragment {
                 transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
             }
         });
+        //переходим на фрагмент "Поделиться"
         shareRelative.setOnClickListener(new View.OnClickListener() { //переходим на фрагмент "поделиться приложением"
             @Override
             public void onClick(View view) {
@@ -148,10 +144,11 @@ public class SettingsFragment extends Fragment {
                 transaction.replace(R.id.fragment_container, fragment).addToBackStack(null).commit();
 
                 Bundle bundle = new Bundle();
-                bundle.putBoolean("share", true); //передаем в фрагмент Share знак, для того, чтобы понять какое действие выполнять там.
+                bundle.putBoolean("share", true);
                 fragment.setArguments(bundle);
             }
         });
+        //переходим на фрагмент "Обновить приложение"
         updateRelative.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

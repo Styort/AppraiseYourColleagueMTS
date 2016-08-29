@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.LightingColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.mtsihr.Fragments.ColleagueFragment;
@@ -28,7 +30,9 @@ import com.example.mtsihr.Fragments.JustFragment;
 import com.example.mtsihr.Fragments.SettingsFragment;
 import com.example.mtsihr.Models.Colleague;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -72,16 +76,56 @@ public class MainActivity extends AppCompatActivity
         initSettingsNavDraw();
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void initSettingsNavDraw() {
-        SharedPreferences sharedPref = this.getSharedPreferences("settings", 0); //получаем данные с настроек
+        //получаем данные с настроек
+        SharedPreferences sharedPref = this.getSharedPreferences("settings", 0);
+        SharedPreferences.Editor editPref  = sharedPref.edit();
+
         int color = sharedPref.getInt("navTextColor", 0);
-        String navBackImageSt = sharedPref.getString("nav_back", ""); //получаем картинку в текстовом формате
-        byte[] imageByteArr = Base64.decode(navBackImageSt, Base64.DEFAULT); //конвертируем строку в массив байтов
-        Bitmap bm = BitmapFactory.decodeByteArray(imageByteArr, 0, imageByteArr.length); //конвертируем массив байтов в изображение
-        BitmapDrawable bmDr = new BitmapDrawable(getResources(), bm);
-        navigationView.setBackground(bmDr);
-        navigationView.setItemTextColor(ColorStateList.valueOf(color));
+        //получаем картинку в текстовом формате
+        String navBackImageSt = sharedPref.getString("nav_back", "");
+        if (color == 0) {
+            editPref.putInt("navTextColor", -16777216);
+            navigationView.setItemTextColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorBlack)));
+        } else {
+            navigationView.setItemTextColor(ColorStateList.valueOf(color));
+        }
+        if (navBackImageSt.equals("")) {
+            navigationView.setBackgroundResource(R.drawable.nav_draw_back);
+            //преобразуем строку в bitmap
+            Bitmap preview = BitmapFactory.decodeResource(this.getResources(), R.drawable.nav_draw_back);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            preview.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            String strByteArrBackImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
+            editPref.putString("nav_back_preview", strByteArrBackImage);
+            editPref.apply();
+        } else {
+            byte[] imageByteArr = Base64.decode(navBackImageSt, Base64.DEFAULT);
+            Bitmap bm = BitmapFactory.decodeByteArray(imageByteArr, 0, imageByteArr.length);
+            BitmapDrawable bmDr = new BitmapDrawable(getResources(), bm);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                navigationView.setBackground(bmDr);
+            }else {
+                navigationView.setBackgroundDrawable(bmDr);
+            }
+        }
+
+        //получаем сохраненный эффект на задний фон
+        int effect = sharedPref.getInt("img_effect", 0);
+
+        //подгружает фильтр на изображение
+        switch (effect){
+            case 0:
+                navigationView.getBackground().clearColorFilter();
+                break;
+            case 1:
+                navigationView.getBackground().setColorFilter(new LightingColorFilter(0xFFFFFFFF , 0x00222222));
+                break;
+            case 2:
+                navigationView.getBackground().setColorFilter(new LightingColorFilter(0xFF7F7F7F, 0x00000000));
+                break;
+        }
     }
 
     @Override
@@ -90,7 +134,6 @@ public class MainActivity extends AppCompatActivity
 
         if (count == 0) {
             super.onBackPressed();
-            //additional code
         } else {
             getFragmentManager().popBackStack();
         }
@@ -105,10 +148,11 @@ public class MainActivity extends AppCompatActivity
         getSupportActionBar().setTitle(title);
     }
 
+
+    //переходим на выбранный фрагмент
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) { //переходим на выбранный фрагмент
-        // Handle navigation view item clicks here.
+    public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
         FragmentTransaction fragmentTransaction;
         Fragment fragment = null;
@@ -136,7 +180,7 @@ public class MainActivity extends AppCompatActivity
                 fragment = new JustFragment();
                 break;
         }
-        if (fragment!=null){
+        if (fragment != null) {
             fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment).addToBackStack(null).commit();
         }

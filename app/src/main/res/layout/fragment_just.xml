@@ -14,10 +14,10 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <ImageView
+                android:id="@+id/just_bg_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="200dp"
-                android:scaleType="fitXY"
-                android:src="@drawable/just_img" />
+                android:scaleType="fitXY" />
 
             <LinearLayout
                 android:id="@+id/show_colleague_ll"
@@ -86,7 +86,7 @@
                 android:layout_height="wrap_content"
                 android:background="@color/colorWhite" />
             <EditText
-                android:id="@+id/comment_iv"
+                android:id="@+id/comment_et"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"

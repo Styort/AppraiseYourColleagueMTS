@@ -3,6 +3,7 @@ package com.example.mtsihr.Fragments;
 
 import android.content.ContentUris;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -10,10 +11,12 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -40,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.jar.Manifest;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -50,6 +54,7 @@ import io.realm.RealmResults;
  */
 public class ColleagueFragment extends Fragment {
 
+    private static final int REQUEST_READ_CONTACT = 555;
     private Realm realm;
     private ListView colleagueList;
     private ColleagueAdapter colleagueAdapter;
@@ -61,6 +66,7 @@ public class ColleagueFragment extends Fragment {
     private FragmentTransaction transaction;
     private FloatingActionButton fab;
     private Bundle getDataBundle;
+    private Intent dataContact;
 
     public ColleagueFragment() {
         // Required empty public constructor
@@ -72,15 +78,18 @@ public class ColleagueFragment extends Fragment {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_colleague, container, false);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Коллеги"); //заголовок тулбара
-        //убираем автооткрытие клавиатуры
+        //убираем автооткрытие клавиатуры при старте
         this.getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        getDataBundle = getArguments(); //получение данных с предыдущего фрагмента
+        //получение данных с предыдущего фрагмента
+        getDataBundle = getArguments();
         realm = Realm.getDefaultInstance();
         colleagues = new ArrayList<>();
 
-        colleagueRealmResults = realm.where(Colleague.class).findAll(); //считываем все данные что есть в бд
-        colleagues = (ArrayList<Colleague>) realm.copyFromRealm(colleagueRealmResults); //переносим данные в наш лист
+        //считываем всех коллег, которые есть бд
+        colleagueRealmResults = realm.where(Colleague.class).findAll();
+        //переносим данные в наш лист
+        colleagues = (ArrayList<Colleague>) realm.copyFromRealm(colleagueRealmResults);
 
 
         initElements(); //инициализируем элементы view
@@ -93,7 +102,8 @@ public class ColleagueFragment extends Fragment {
         return rootView;
     }
 
-    private void fabShowHide() { //скрыть кнопку добавить коллегу при скроле
+    //скрыть кнопку добавить коллегу при скроле
+    private void fabShowHide() {
         colleagueList.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int i) {
@@ -120,7 +130,8 @@ public class ColleagueFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI); //открываем список контактов
+                //открываем список контактов
+                Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
                 startActivityForResult(intent, PICK_CONTACT);
             }
         });
@@ -132,18 +143,21 @@ public class ColleagueFragment extends Fragment {
         MenuInflater inflater = getActivity().getMenuInflater();
         inflater.inflate(R.menu.menu_context_colleague, menu);
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        String title = (String) ((TextView) info.targetView.findViewById(R.id.name)).getText(); //имя коллеги
+        String title = (String) ((TextView) info.targetView.findViewById(R.id.name)).getText();
         menu.setHeaderTitle(title); //добавляем в контекстное меню заголовок с именем коллеги
     }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) { //обрабатываем нажатия на элементы контекстного меню
+    //обрабатываем нажатия на элементы контекстного меню
+    public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        Object origObj = colleagueAdapter.getItem(info.position); //получаем нажатый обьект в отфильтрованном листе
-        int position = colleagueAdapter.getPosition(origObj); //находим позицию объекта origObj в неотфильтрованном листе
+        //получаем нажатый обьект в отфильтрованном листе
+        Object origObj = colleagueAdapter.getItem(info.position);
+        //находим позицию объекта origObj в неотфильтрованном листе
+        int position = colleagueAdapter.getPosition(origObj);
         switch (item.getItemId()) {
-            case R.id.estimate_menu: //переходим к оцениванию коллеги
-
+            //переходим к оцениванию коллеги
+            case R.id.estimate_menu:
                 Fragment fragment = new JustFragment();
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 transaction = fm.beginTransaction();
@@ -162,11 +176,14 @@ public class ColleagueFragment extends Fragment {
                 bundle.putInt("position", position);
                 fragment.setArguments(bundle);
                 return true;
-            case R.id.delete_menu: //удаляем коллегу из списка
+            //удаляем коллегу из списка
+            case R.id.delete_menu:
                 realm.beginTransaction();
-                colleagueRealmResults.deleteFromRealm(position); //удаляем коллегу из бд
+                //удаляем коллегу из бд
+                colleagueRealmResults.deleteFromRealm(position);
                 realm.commitTransaction();
-                transaction = getFragmentManager().beginTransaction(); //обновляем фрагмент
+                //обновляем фрагмент
+                transaction = getFragmentManager().beginTransaction();
                 transaction.detach(this).attach(this).commit();
                 return true;
             default:
@@ -189,38 +206,31 @@ public class ColleagueFragment extends Fragment {
 
     private void showInfo() {
         boolean isShare = false, isJust = false;
-        if (getDataBundle != null) { //получаем данные с предыдущего фрагмента
+        if (getDataBundle != null) {
+            //получаем данные с предыдущего фрагмента
             isShare = getDataBundle.getBoolean("share"); //знак о том, что при нажатии на коллегу, мы поделимся с ним приложением
             isJust = getDataBundle.getBoolean("just"); //знак о том, что при нажатии на коллегу, мы перейдем выбору оценки
         }
-        if (isShare) { //проверка откуда произошел переход на данный фрагмент
+        if (isShare) {
             //делимся приложением
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Поделиться приложением"); //заголовок тулбара
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Поделиться приложением");
             colleagueList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     Object origObj = colleagueAdapter.getItem(i);
                     int position = colleagueAdapter.getPosition(origObj);
-                    //send email
                     Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
                     emailIntent.setData(Uri.parse("mailto:")); // only email apps should handle this
-                    emailIntent.putExtra(Intent.EXTRA_EMAIL, colleagues.get(position).getEmail());
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{colleagues.get(position).getEmail()});
                     emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
                     if (emailIntent.resolveActivity(getActivity().getPackageManager()) != null) {
                         startActivity(Intent.createChooser(emailIntent, "Отправить email..."));
                     }
 
-                    /*
-                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
-                    emailIntent.setType("message/rfc822");
-                    emailIntent.putExtra(Intent.EXTRA_EMAIL, colleagues.get(position).getEmail());
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
-                    emailIntent.putExtra(Intent.EXTRA_TEXT, "");
-
-                    startActivity(Intent.createChooser(emailIntent, "Отправить email...")); */
                 }
             });
-        } else if (isJust) { //переходим к оценке коллеги
+        } else if (isJust) {
+            //переходим к оценке коллеги
             colleagueList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -230,9 +240,11 @@ public class ColleagueFragment extends Fragment {
                     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
 
-                    Colleague concreteColleague = (Colleague) adapterView.getItemAtPosition(i); //получаем позицию выбранного коллеги
+                    //получаем позицию выбранного коллеги
+                    Colleague concreteColleague = (Colleague) adapterView.getItemAtPosition(i);
 
-                    Bundle passDataBundle = new Bundle(); //передаем данные в слудующий фрагмент
+                    //передаем данные в слудующий фрагмент
+                    Bundle passDataBundle = new Bundle();
 
                     passDataBundle.putString("name", concreteColleague.getName());
                     passDataBundle.putString("post", concreteColleague.getPost());
@@ -259,8 +271,8 @@ public class ColleagueFragment extends Fragment {
                     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
 
-                    Colleague concreteColleague = (Colleague) adapterView.getItemAtPosition(i); //получаем позицию выбранного коллеги
-                    // в листе с учетом фильтра
+                    //получаем позицию выбранного коллеги в листе с учетом фильтра
+                    Colleague concreteColleague = (Colleague) adapterView.getItemAtPosition(i);
                     //передаем данные о коллеге в фрагмент PersonInfo
                     Bundle bundle = new Bundle();
                     bundle.putString("name", concreteColleague.getName());
@@ -289,114 +301,18 @@ public class ColleagueFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_CONTACT) { //получаем данные с контакт листа
+        if (requestCode == PICK_CONTACT) {
             if (resultCode == AppCompatActivity.RESULT_OK) {
-                Uri contactData = data.getData();
-                Cursor c = getActivity().getContentResolver().query(contactData, null, null, null, null);
-                String mContactId, mContactName, mPhoneNumber = null, mEmail = null, orgName = null, orgTitle = null;
-                if (c.moveToNext()) {
-                    boolean isExists = false;
-                    mContactId = c.getString(c.getColumnIndex(ContactsContract.Contacts._ID));
-                    InputStream isPhoto = openDisplayPhoto(Long.parseLong(mContactId));
-                    byte[] byteArray = null;
-                    if (isPhoto != null) {
-                        Bitmap photoBmp = BitmapFactory.decodeStream(isPhoto); //получаем bitmap изображение
-                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        photoBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                        byteArray = stream.toByteArray(); //конвертируем bitmap в bytearray
-                        try {
-                            isPhoto.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                //получаем данные с контакт листа
+                if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.READ_CONTACTS)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    dataContact = data;
+                    readContacts(data);
+                } else {
+                    if (shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS)) {
+                        Toast.makeText(getActivity(), "Read contacts needed to show contacts preview", Toast.LENGTH_LONG).show();
                     }
-                    mContactName = c.getString(c.getColumnIndexOrThrow(
-                            ContactsContract.Contacts.DISPLAY_NAME));
-
-                    String hasPhone = c.getString(c.getColumnIndex(
-                            ContactsContract.Contacts.HAS_PHONE_NUMBER));
-
-                    // если есть телефон, получаем его
-                    if (hasPhone.equalsIgnoreCase("1")) {
-                        Cursor phones = getActivity().getContentResolver().query(
-                                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                                null,
-                                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + mContactId,
-                                null,
-                                null);
-
-                        while (phones.moveToNext()) {
-                            mPhoneNumber = phones.getString(phones.getColumnIndex(
-                                    ContactsContract.CommonDataKinds.Phone.NUMBER));
-                            for (Colleague col : colleagues) { //проверка, если ли коллега с данным номером в бд
-                                if (col.getPhone() != null) {
-                                    if (col.getPhone().equals(mPhoneNumber)) {
-                                        isExists = true;
-                                        Toast.makeText(getActivity(), "Коллега уже есть в вашем списке!", Toast.LENGTH_SHORT).show();
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        phones.close();
-                    }
-                    if (!isExists) { //если человек с таким телефоном уже есть в списке, то не добавлять
-                        // Достаем email-ы
-                        Cursor emails = getActivity().getContentResolver().query(
-                                ContactsContract.CommonDataKinds.Email.CONTENT_URI,
-                                null,
-                                ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = " + mContactId,
-                                null,
-                                null);
-                        while (emails.moveToNext()) {
-                            mEmail = emails.getString(
-                                    emails.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                            for (Colleague col : colleagues) {
-                                if (col.getEmail() != null) {
-                                    if (col.getEmail().equals(mEmail)) {
-                                        isExists = true;
-                                        Toast.makeText(getActivity(), "Коллега уже есть в вашем списке!", Toast.LENGTH_SHORT).show();
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        emails.close();
-                        if (!isExists) { //если человек с таким мейлом уже есть в списке, то не добавлять
-                            String orgWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
-                            String[] orgWhereParams = new String[]{mContactId,
-                                    ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE};
-
-                            //Получаем данные о работе
-                            Cursor orgCur = getActivity().getContentResolver().query(
-                                    ContactsContract.Data.CONTENT_URI,
-                                    null,
-                                    orgWhere,
-                                    orgWhereParams,
-                                    null
-                            );
-                            if (orgCur.moveToFirst()) {
-                                orgName = orgCur.getString(orgCur.getColumnIndex(ContactsContract.CommonDataKinds.Organization.DATA));
-                                orgTitle = orgCur.getString(orgCur.getColumnIndex(ContactsContract.CommonDataKinds.Organization.TITLE));
-                            }
-                            orgCur.close();
-
-                            realm.beginTransaction();
-                            // Set its fields
-                            Colleague colleague = realm.createObject(Colleague.class);
-                            colleague.setName(mContactName);
-                            colleague.setPhone(mPhoneNumber);
-                            colleague.setEmail(mEmail);
-                            colleague.setPost(orgName);
-                            colleague.setSubdivision(orgTitle);
-                            colleague.setPhoto(byteArray);
-
-                            realm.commitTransaction();
-
-                            FragmentTransaction ft = getFragmentManager().beginTransaction();
-                            ft.detach(this).attach(this).commit();
-                        }
-                    }
+                    requestPermissions(new String[]{android.Manifest.permission.READ_CONTACTS}, REQUEST_READ_CONTACT);
                 }
             }
         }
@@ -435,4 +351,137 @@ public class ColleagueFragment extends Fragment {
         });
     }
 
+    public void readContacts(Intent data){
+        Uri contactData = data.getData();
+        Cursor c = getActivity().getContentResolver().query(contactData, null, null, null, null);
+        String mContactId, mContactName, mPhoneNumber = null, mEmail = null, orgName = null, orgTitle = null;
+        if (c.moveToNext()) {
+            boolean isExists = false;
+            mContactId = c.getString(c.getColumnIndex(ContactsContract.Contacts._ID));
+            InputStream isPhoto = openDisplayPhoto(Long.parseLong(mContactId));
+            byte[] byteArray = null;
+            if (isPhoto != null) {
+                Bitmap photoBmp = BitmapFactory.decodeStream(isPhoto);
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                photoBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                //конвертируем bitmap в bytearray для того, чтобы его можно было передать след. фрагмент
+                byteArray = stream.toByteArray();
+                try {
+                    isPhoto.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            mContactName = c.getString(c.getColumnIndexOrThrow(
+                    ContactsContract.Contacts.DISPLAY_NAME));
+
+            String hasPhone = c.getString(c.getColumnIndex(
+                    ContactsContract.Contacts.HAS_PHONE_NUMBER));
+
+            // если есть телефон, получаем его
+            if (hasPhone.equalsIgnoreCase("1")) {
+                Cursor phones = getActivity().getContentResolver().query(
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                        null,
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + mContactId,
+                        null,
+                        null);
+
+                while (phones.moveToNext()) {
+                    mPhoneNumber = phones.getString(phones.getColumnIndex(
+                            ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    //проверка, если ли коллега с данным номером в бд
+                    for (Colleague col : colleagues) {
+                        if (col.getPhone() != null) {
+                            if (col.getPhone().equals(mPhoneNumber)) {
+                                isExists = true;
+                                Toast.makeText(getActivity(), "Коллега уже есть в вашем списке!", Toast.LENGTH_SHORT).show();
+                                break;
+                            }
+                        }
+                    }
+                }
+                phones.close();
+            }
+            if (!isExists) {
+                //если человек с таким телефоном уже есть в списке, то не добавлять
+                // Достаем email-ы
+                Cursor emails = getActivity().getContentResolver().query(
+                        ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+                        null,
+                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = " + mContactId,
+                        null,
+                        null);
+                while (emails.moveToNext()) {
+                    mEmail = emails.getString(
+                            emails.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                    for (Colleague col : colleagues) {
+                        if (col.getEmail() != null) {
+                            if (col.getEmail().equals(mEmail)) {
+                                isExists = true;
+                                Toast.makeText(getActivity(), "Коллега уже есть в вашем списке!", Toast.LENGTH_SHORT).show();
+                                break;
+                            }
+                        }
+                    }
+                }
+                emails.close();
+                if (!isExists) {
+                    String orgWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+                    String[] orgWhereParams = new String[]{mContactId,
+                            ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE};
+
+                    //Получаем данные о работе
+                    Cursor orgCur = getActivity().getContentResolver().query(
+                            ContactsContract.Data.CONTENT_URI,
+                            null,
+                            orgWhere,
+                            orgWhereParams,
+                            null
+                    );
+                    if (orgCur.moveToFirst()) {
+                        orgName = orgCur.getString(orgCur.getColumnIndex(ContactsContract.CommonDataKinds.Organization.DATA));
+                        orgTitle = orgCur.getString(orgCur.getColumnIndex(ContactsContract.CommonDataKinds.Organization.TITLE));
+                    }
+                    orgCur.close();
+
+                    realm.beginTransaction();
+                    // Set its fields
+                    Colleague colleague = realm.createObject(Colleague.class);
+                    colleague.setName(mContactName);
+                    colleague.setPhone(mPhoneNumber);
+                    colleague.setEmail(mEmail);
+                    colleague.setPost(orgName);
+                    colleague.setSubdivision(orgTitle);
+                    colleague.setPhoto(byteArray);
+
+                    realm.commitTransaction();
+
+                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                    ft.detach(this).attach(this).commit();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_READ_CONTACT: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    readContacts(dataContact);
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+                    Toast.makeText(getActivity(), "Permission was not granted", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
 }

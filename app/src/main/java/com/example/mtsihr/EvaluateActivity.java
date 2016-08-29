@@ -34,8 +34,10 @@ public class EvaluateActivity extends AppCompatActivity {
         setContentView(R.layout.activity_evaluate);
 
         Intent getDataIntent = getIntent();
-        getSupportActionBar().setTitle(getDataIntent.getStringExtra("evalName")); //заголовок тулбара
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true); //отображение кнопки "назад" в тулбаре
+        //заголовок тулбара
+        getSupportActionBar().setTitle(getDataIntent.getStringExtra("evalName"));
+        //отображение кнопки "назад" в тулбаре
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         initElements();
     }

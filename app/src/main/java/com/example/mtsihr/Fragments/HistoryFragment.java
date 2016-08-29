@@ -55,21 +55,25 @@ public class HistoryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("История"); //заголовок тулбара
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("История");
         rootView = inflater.inflate(R.layout.fragment_history, container, false);
 
         realm = Realm.getDefaultInstance();
         historyArray = new ArrayList<>();
 
-        historyRealmResults = realm.where(HistoryModel.class).findAll(); //считываем все данные что есть в бд
-        getDataBundle = getArguments(); //получение данных с предыдущего фрагмента
-        initHistoryArray(); //получаем массив с историей
+        //считываем всю историю, которая есть в бд
+        historyRealmResults = realm.where(HistoryModel.class).findAll();
+        //получение данных с предыдущего фрагмента
+        getDataBundle = getArguments();
+        //получаем массив с историей
+        initHistoryArray();
 
         initElements();
         initAdapter();
         searchFilter();
-        showHistoryInfo(); //показываем фрагмент с информацией об оценке
-        registerForContextMenu(historyLV); //создаем контекстное меню для списка истории оценок
+        showHistoryInfo();
+        //контекстное меню для удаление истории оценки
+        registerForContextMenu(historyLV);
         return rootView;
     }
 
@@ -92,7 +96,7 @@ public class HistoryFragment extends Fragment {
             }
 
         }else {
-            historyArray = (ArrayList<HistoryModel>) realm.copyFromRealm(historyRealmResults); //переносим данные в наш лист
+            historyArray = (ArrayList<HistoryModel>) realm.copyFromRealm(historyRealmResults);
         }
     }
 
@@ -106,8 +110,9 @@ public class HistoryFragment extends Fragment {
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
 
-                HistoryModel concreteHistory = (HistoryModel) adapterView.getItemAtPosition(i); //получаем позицию выбранного коллеги
-                // в листе с учетом фильтра
+                //получаем позицию выбранного коллеги в листе с учетом фильтра
+                HistoryModel concreteHistory = (HistoryModel) adapterView.getItemAtPosition(i);
+
                 //передаем данные о истории оценки в фрагмент ConcreteHistory
                 Bundle bundle = new Bundle();
                 bundle.putString("name", concreteHistory.getName());
@@ -149,21 +154,26 @@ public class HistoryFragment extends Fragment {
         MenuInflater inflater = getActivity().getMenuInflater();
         inflater.inflate(R.menu.menu_context_history, menu);
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        String title = (String) ((TextView) info.targetView.findViewById(R.id.hist_coll_name_tv)).getText(); //имя коллеги
+        String title = (String) ((TextView) info.targetView.findViewById(R.id.hist_coll_name_tv)).getText();
         menu.setHeaderTitle(title);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        Object origObj = historyAdapter.getItem(info.position); //получаем нажатый обьект в отфильтрованном листе
-        int position = historyAdapter.getPosition(origObj); //находим позицию объекта origObj в неотфильтрованном листе
+        //получаем нажатый обьект в отфильтрованном листе
+        Object origObj = historyAdapter.getItem(info.position);
+        //находим позицию объекта origObj в неотфильтрованном листе
+        int position = historyAdapter.getPosition(origObj);
         switch (item.getItemId()) {
-            case R.id.delete_menu: //удаляем историю оценки из списка
+            //удаляем историю оценки из списка
+            case R.id.delete_menu:
                 realm.beginTransaction();
-                historyRealmResults.deleteFromRealm(position); //удаляем историю из бд
+                //удаляем историю из бд
+                historyRealmResults.deleteFromRealm(position);
                 realm.commitTransaction();
-                transaction = getFragmentManager().beginTransaction(); //обновляем фрагмент
+                //обновляем фрагмент
+                transaction = getFragmentManager().beginTransaction();
                 transaction.detach(this).attach(this).commit();
                 return true;
             default:
