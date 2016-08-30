@@ -162,15 +162,19 @@
             android:text="@string/save_history_settings"
             android:textSize="18sp" />
 
-        <Switch
+        <ToggleButton
             android:id="@+id/history_save_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@+id/textView"
+            android:layout_width="50dp"
+            android:layout_height="28dp"
             android:layout_marginRight="16dp"
-            android:checked="true"/>
+            android:background="@drawable/toggle_selector"
+            android:checked="true"
+            android:text=""
+            android:textOff=""
+            android:textOn=""
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
     </RelativeLayout>
 
     <TextView
@@ -185,14 +189,15 @@
         android:id="@+id/delete_colleague_list_butt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/delete_colleague_settings"
-        android:textColor="@color/colorRed" />
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:text="@string/delete_colleague_settings" />
     <Button
         android:id="@+id/delete_history_list_butt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/delete_history_settings"
-        android:textColor="@color/colorRed" />
-
-
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:text="@string/delete_history_settings" />
 </LinearLayout>

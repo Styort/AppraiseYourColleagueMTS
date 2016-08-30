@@ -3,6 +3,8 @@ package com.example.mtsihr.Fragments;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -15,6 +17,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -80,7 +83,6 @@ public class PersonInfoFragment extends Fragment {
         initElemets();
         initAdapter();
         //инициализируем нажатие на вьюхи
-        itemClick();
         return rootView;
     }
 
@@ -106,6 +108,10 @@ public class PersonInfoFragment extends Fragment {
         circlePhotoColleague = (CircleImageView) rootView.findViewById(R.id.profile_image);
         photoBackground = (ImageView) rootView.findViewById(R.id.profile_image_back);
 
+        initOnItemClickListeners();
+        callColleagueCB.setOnClickListener(viewClickListener);
+        smsColleagueCB.setOnClickListener(viewClickListener);
+
         contactLV.setBackgroundColor(Color.WHITE);
         actionsLV.setBackgroundColor(Color.WHITE);
 
@@ -117,16 +123,16 @@ public class PersonInfoFragment extends Fragment {
             byte[] photoByte = photo;
             Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
             circlePhotoColleague.setImageBitmap(bm);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 // применяем размытое изображение
                 photoBackground.setImageBitmap(BlurBuilder.blur(getActivity(), bm, 20));
-            }else {
+            } else {
                 photoBackground.setImageBitmap(bm);
             }
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                Bitmap photo = BitmapFactory.decodeResource(getContext().getResources(),
-                        R.drawable.photo);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                //Bitmap photo = BitmapFactory.decodeResource(getContext().getResources(),
+                //R.drawable.photo);
                 //photoBackground.setImageBitmap(BlurBuilder.blur(getActivity(), photo , 20));
                 //circlePhotoColleague.setImageBitmap(photo);
             }
@@ -135,64 +141,18 @@ public class PersonInfoFragment extends Fragment {
         photoBackground.setColorFilter(new LightingColorFilter(0xFF7F7F7F, 0x00000000));
     }
 
-    private void initAdapter() {
-        //создаем HashMap с контактными данными
-        HashMap<String, String> map = new HashMap<String, String>();
-        if (conArr.size() == 0) { //не добавлять больше элементов, если номер телефона и эмейл есть в conArr
-            map.put("Name", "сотовый");
-            if (phone != null) {
-                map.put("Data", phone);
-            } else {
-                map.put("Data", "Данные не заполнены");
-            }
-            conArr.add(map);
-            try {
-                if (email != null) {
-                    map = new HashMap<>();
-                    map.put("Name", "рабочий");
-                    map.put("Data", email);
-                    conArr.add(map);
-                }
-            } catch (NullPointerException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        SimpleAdapter adapter = new SimpleAdapter(getActivity(), conArr, android.R.layout.simple_list_item_2,
-                new String[]{"Name", "Data"},
-                new int[]{android.R.id.text1, android.R.id.text2}) {
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-                //TextView text2 = (TextView) view.findViewById(android.R.id.text2);
-                text1.setTextColor(Color.parseColor("#76b9f1"));
-                return view;
-            }
-        };
-
-        contactLV.setAdapter(adapter);
-
-        //лист с действиями
-        String[] actionName = {"Оценить коллегу", "Заказать детальный отчет", "Просмотреть историю оценок"};
-        actionsLV.setAdapter(new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_list_item_1, actionName));
-        //задаем высоту листам в зависимости от кол-ва его элементов
-        setListViewHeightBasedOnChildren(contactLV);
-        setListViewHeightBasedOnChildren(actionsLV);
-    }
-
-    private void itemClick() {
-        //реализация клика на телефон или email
+    private void initOnItemClickListeners() {
         contactLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //choose app for call
                 if (i == 0) {
                     //если нажат первый элемент списка выбираем способ как позвонить
                     if (conArr.get(i).get("Data") != "Данные не заполнены") {
-                        String phoneNum = conArr.get(i).get("Data");
-                        Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNum));
-                        startActivity(Intent.createChooser(callActivity, "Позвонить коллеге"));
+                        //Если есть номер телефона, то звоним.
+                        showPopupMenu(view);
+                    } else {
+                        //Если нет номера, показываем сообщение об этом
+                        Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     //если нажат второй элемент списка отправляем email
@@ -209,7 +169,6 @@ public class PersonInfoFragment extends Fragment {
                 }
             }
         });
-        //переход на фрагмент с оценкой
         actionsLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -270,41 +229,86 @@ public class PersonInfoFragment extends Fragment {
                 }
             }
         });
-
-        //нажатие на кнопку звонок коллеге
-        callColleagueCB.setOnClickListener(new View.OnClickListener() { //звоним коллеге
-            @Override
-            public void onClick(View view) {
-                if (conArr.get(0).get("Data") != "Данные не заполнены") {
-                    //Если есть номер телефона, то звоним.
-                    Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + conArr.get(0).get("Data")));
-                    startActivity(callActivity);
-                } else {
-                    //Если нет номера, показываем сообщение об этом
-                    Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        //нажатие на кнопку написать смс коллеге
-        smsColleagueCB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (conArr.get(0).get("Data") != "Данные не заполнены") {
-                    //если есть номер телефона, переходим к смс.
-                    Intent smsIntent = new Intent(Intent.ACTION_VIEW);
-                    smsIntent.setType("vnd.android-dir/mms-sms");
-                    smsIntent.putExtra("address", conArr.get(0).get("Data"));
-                    smsIntent.putExtra("sms_body", "Здравствуйте!");
-                    startActivity(smsIntent);
-                } else {
-                    //Если нет номера, показываем сообщение об этом
-                    Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
     }
+
+    private void initAdapter() {
+        //создаем HashMap с контактными данными
+        HashMap<String, String> map = new HashMap<String, String>();
+        if (conArr.size() == 0) { //не добавлять больше элементов, если номер телефона и эмейл есть в conArr
+            map.put("Name", "сотовый");
+            if (phone != null) {
+                map.put("Data", phone);
+            } else {
+                map.put("Data", "Данные не заполнены");
+            }
+            conArr.add(map);
+            try {
+                if (email != null) {
+                    map = new HashMap<>();
+                    map.put("Name", "рабочий");
+                    map.put("Data", email);
+                    conArr.add(map);
+                }
+            } catch (NullPointerException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        SimpleAdapter adapter = new SimpleAdapter(getActivity(), conArr, android.R.layout.simple_list_item_2,
+                new String[]{"Name", "Data"},
+                new int[]{android.R.id.text1, android.R.id.text2}) {
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView text1 = (TextView) view.findViewById(android.R.id.text1);
+                //TextView text2 = (TextView) view.findViewById(android.R.id.text2);
+                text1.setTextColor(Color.parseColor("#76b9f1"));
+                return view;
+            }
+        };
+
+        contactLV.setAdapter(adapter);
+
+        //лист с действиями
+        String[] actionName = {"Оценить коллегу", "Заказать детальный отчет", "Просмотреть историю оценок"};
+        actionsLV.setAdapter(new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_list_item_1, actionName));
+        //задаем высоту листам в зависимости от кол-ва его элементов
+        setListViewHeightBasedOnChildren(contactLV);
+        setListViewHeightBasedOnChildren(actionsLV);
+    }
+
+    View.OnClickListener viewClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()) {
+                //нажатие на кнопку позвонить коллеге
+                case R.id.call_colleague_butt:
+                    if (conArr.get(0).get("Data") != "Данные не заполнены") {
+                        //Если есть номер телефона, то звоним.
+                        Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + conArr.get(0).get("Data")));
+                        startActivity(callActivity);
+                    } else {
+                        //Если нет номера, показываем сообщение об этом
+                        Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                //нажатие на кнопку написать смс коллеге
+                case R.id.sms_colleague_butt:
+                    if (conArr.get(0).get("Data") != "Данные не заполнены") {
+                        //если есть номер телефона, переходим к смс.
+                        Intent smsIntent = new Intent(Intent.ACTION_VIEW);
+                        smsIntent.setType("vnd.android-dir/mms-sms");
+                        smsIntent.putExtra("address", conArr.get(0).get("Data"));
+                        smsIntent.putExtra("sms_body", "Здравствуйте!");
+                        startActivity(smsIntent);
+                    } else {
+                        //Если нет номера, показываем сообщение об этом
+                        Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+            }
+        }
+    };
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -326,7 +330,7 @@ public class PersonInfoFragment extends Fragment {
 
 
     @Override
-    //обрабатываем нажатие на элмент тулбара
+//обрабатываем нажатие на элмент тулбара
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_delete:
@@ -386,5 +390,67 @@ public class PersonInfoFragment extends Fragment {
         params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
         listView.setLayoutParams(params);
         listView.requestLayout();
+    }
+
+    //Показываем всплывающее меню, с выбором способа позвонить коллеге
+    private void showPopupMenu(View v) {
+        PopupMenu popupMenu = new PopupMenu(getActivity(), v);
+        popupMenu.inflate(R.menu.call_popup_menu); // Для Android 4.0
+        // для версии Android 3.0 нужно использовать длинный вариант
+        // popupMenu.getMenuInflater().inflate(R.menu.popupmenu,
+        // popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                // Toast.makeText(PopupMenuDemoActivity.this,
+                // item.toString(), Toast.LENGTH_LONG).show();
+                // return true;
+                switch (item.getItemId()) {
+                    case R.id.call_phone:
+                        Intent callActivity = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + conArr.get(0).get("Data")));
+                        startActivity(callActivity);
+                        return true;
+                    case R.id.call_viber:
+                        PackageManager pmv = getActivity().getPackageManager();
+                        try {
+                            Uri uri = Uri.parse("tel:" + conArr.get(0).get("Data"));
+                            PackageInfo info = pmv.getPackageInfo("com.viber.voip", PackageManager.GET_META_DATA);
+                            Intent intent = new Intent("android.intent.action.VIEW");
+                            intent.setClassName("com.viber.voip", "com.viber.voip.WelcomeActivity");
+                            intent.setData(uri);
+                            startActivity(intent);
+                        } catch (PackageManager.NameNotFoundException e) {
+                            Toast.makeText(getActivity(), "Viber не установлен!", Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+
+                        return true;
+                    case R.id.call_whatsapp:
+                        PackageManager pmwa = getActivity().getPackageManager();
+                        try {
+                            Intent waIntent = new Intent(Intent.ACTION_SEND);
+                            waIntent.setType("text/plain");
+                            String text = "YOUR TEXT HERE";
+
+                            PackageInfo info = pmwa.getPackageInfo("com.whatsapp", PackageManager.GET_META_DATA);
+                            //Check if package exists or not. If not then code
+                            //in catch block will be called
+                            waIntent.setPackage("com.whatsapp");
+
+                            waIntent.putExtra(Intent.EXTRA_TEXT, text);
+                            startActivity(Intent.createChooser(waIntent, "Share with"));
+
+                        } catch (PackageManager.NameNotFoundException e) {
+                            Toast.makeText(getActivity(), "WhatsApp не установлен!", Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+        popupMenu.show();
     }
 }

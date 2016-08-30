@@ -1,16 +1,11 @@
 package com.example.mtsihr.Fragments;
 
 
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,16 +13,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.example.mtsihr.Adapters.HelpPagerAdapter;
 import com.example.mtsihr.Models.DetailHelp;
-import com.example.mtsihr.Models.HistoryModel;
 import com.example.mtsihr.R;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -91,7 +82,7 @@ public class HelpFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         //добавляем в тулбар кнопку с быстрым переходом на страницы
-        getActivity().getMenuInflater().inflate(R.menu.helo_info_menu, menu);
+        getActivity().getMenuInflater().inflate(R.menu.help_info_menu, menu);
     }
 
     @Override

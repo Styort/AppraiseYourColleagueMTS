@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
@@ -17,6 +18,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -116,7 +118,11 @@ public class MenuStyleSettingsFragment extends Fragment {
         seekBar.setMax(25);
         //считываем сколько было размытие
         seekBar.setProgress(blurValue);
-        previewImageNavDrawIV.setImageBitmap(BlurBuilder.blur(getActivity(), getPreviewImage(), blurValue));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            previewImageNavDrawIV.setImageBitmap(BlurBuilder.blur(getActivity(), getPreviewImage(), blurValue));
+        } else {
+            previewImageNavDrawIV.setImageBitmap(getPreviewImage());
+        }
         //getPreviewImage();
     }
 
@@ -264,6 +270,7 @@ public class MenuStyleSettingsFragment extends Fragment {
                 editPref.apply();
                 seekBar.setProgress(0);
                 chooseColorTV.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorBlack));
+                navigationView.setItemTextColor(ColorStateList.valueOf(Color.BLACK));
                 saveNavDrImage(previewImage);
                 savePreviewSetting(previewImage);
             }
@@ -398,7 +405,7 @@ public class MenuStyleSettingsFragment extends Fragment {
         //преобразовав массив байтов в строку, отправляем ее в preference
         editPref.putInt("blur_value", blurValue);
         editPref.putString("nav_back_preview", strByteArrBackImage);
-        editPref.apply();
+        editPref.commit();
     }
 
     //сохраняем обработанное изображение в preference и применяем его к меню
@@ -409,7 +416,8 @@ public class MenuStyleSettingsFragment extends Fragment {
         String strByteArrBackImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
         //преобразовав массив байтов в строку, отправляем ее в preference
         editPref.putString("nav_back", strByteArrBackImage);
-        editPref.apply();
+        editPref.commit();
+
         Drawable drNavImg = new BitmapDrawable(getResources(), bm);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             navigationView.setBackground(drNavImg);
@@ -422,8 +430,12 @@ public class MenuStyleSettingsFragment extends Fragment {
     public void onStop() {
         super.onStop();
         if (previewImage != null) {
-            //сохраняем обработанное изображение
-            saveNavDrImage(BlurBuilder.blur(getActivity(), previewImage, blurValue));
+            /*
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                saveNavDrImage(BlurBuilder.blur(getActivity(), previewImage, blurValue));
+            } else {
+                saveNavDrImage(previewImage);
+            }*/
             //сохраняем необработанное изображение и значение размытия
             savePreviewSetting(previewImage);
             if (lightEffRB.isChecked()) {

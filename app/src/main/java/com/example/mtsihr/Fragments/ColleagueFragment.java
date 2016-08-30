@@ -67,6 +67,7 @@ public class ColleagueFragment extends Fragment {
     private FloatingActionButton fab;
     private Bundle getDataBundle;
     private Intent dataContact;
+    private Boolean colleagueIsExists = false;
 
     public ColleagueFragment() {
         // Required empty public constructor
@@ -299,7 +300,7 @@ public class ColleagueFragment extends Fragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_CONTACT) {
             if (resultCode == AppCompatActivity.RESULT_OK) {
@@ -307,7 +308,15 @@ public class ColleagueFragment extends Fragment {
                 if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.READ_CONTACTS)
                         == PackageManager.PERMISSION_GRANTED) {
                     dataContact = data;
-                    readContacts(data);
+                    //добавляем коллегу в список в новом потоке
+                    new Thread(new Runnable() {
+                        public void run() {
+                            readContacts(data);
+                        }
+                    }).start();
+                    if(colleagueIsExists){
+                        Toast.makeText(getActivity(), "Коллега уже есть в вашем списке!", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     if (shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS)) {
                         Toast.makeText(getActivity(), "Read contacts needed to show contacts preview", Toast.LENGTH_LONG).show();
@@ -356,6 +365,7 @@ public class ColleagueFragment extends Fragment {
         Cursor c = getActivity().getContentResolver().query(contactData, null, null, null, null);
         String mContactId, mContactName, mPhoneNumber = null, mEmail = null, orgName = null, orgTitle = null;
         if (c.moveToNext()) {
+            colleagueIsExists = false;
             boolean isExists = false;
             mContactId = c.getString(c.getColumnIndex(ContactsContract.Contacts._ID));
             InputStream isPhoto = openDisplayPhoto(Long.parseLong(mContactId));
@@ -395,7 +405,7 @@ public class ColleagueFragment extends Fragment {
                         if (col.getPhone() != null) {
                             if (col.getPhone().equals(mPhoneNumber)) {
                                 isExists = true;
-                                Toast.makeText(getActivity(), "Коллега уже есть в вашем списке!", Toast.LENGTH_SHORT).show();
+                                colleagueIsExists = true;
                                 break;
                             }
                         }
@@ -419,7 +429,7 @@ public class ColleagueFragment extends Fragment {
                         if (col.getEmail() != null) {
                             if (col.getEmail().equals(mEmail)) {
                                 isExists = true;
-                                Toast.makeText(getActivity(), "Коллега уже есть в вашем списке!", Toast.LENGTH_SHORT).show();
+                                colleagueIsExists = true;
                                 break;
                             }
                         }
@@ -445,9 +455,11 @@ public class ColleagueFragment extends Fragment {
                     }
                     orgCur.close();
 
-                    realm.beginTransaction();
+                    Realm realmTh = Realm.getDefaultInstance();
+
+                    realmTh.beginTransaction();
                     // Set its fields
-                    Colleague colleague = realm.createObject(Colleague.class);
+                    Colleague colleague = realmTh.createObject(Colleague.class);
                     colleague.setName(mContactName);
                     colleague.setPhone(mPhoneNumber);
                     colleague.setEmail(mEmail);
@@ -455,7 +467,7 @@ public class ColleagueFragment extends Fragment {
                     colleague.setSubdivision(orgTitle);
                     colleague.setPhoto(byteArray);
 
-                    realm.commitTransaction();
+                    realmTh.commitTransaction();
 
                     FragmentTransaction ft = getFragmentManager().beginTransaction();
                     ft.detach(this).attach(this).commit();

@@ -1,8 +1,8 @@
 package com.example.mtsihr.Fragments;
 
 
-
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -16,6 +16,7 @@ import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.Models.HistoryModel;
@@ -32,6 +33,7 @@ public class SettingsFragment extends Fragment {
     private View rootView;
     private Button clearHistoryData, clearColleagueData;
     private Switch historySaveSwitch;
+    private ToggleButton historySaveTB;
     private SharedPreferences pref;
     private RelativeLayout aboutAppRelative,
             menuStyleRelative, shareRelative, updateRelative;
@@ -44,7 +46,7 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_settings, container, false);
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Настройки");
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Настройки");
 
         realm = Realm.getDefaultInstance();
         //считываем все данные, что есть в бд
@@ -61,14 +63,20 @@ public class SettingsFragment extends Fragment {
     private void initElements() {
         clearHistoryData = (Button) rootView.findViewById(R.id.delete_history_list_butt);
         clearColleagueData = (Button) rootView.findViewById(R.id.delete_colleague_list_butt);
-        historySaveSwitch = (Switch) rootView.findViewById(R.id.history_save_switch);
+        Boolean saveHistory = pref.getBoolean("save_history", true);
+        //получаем настройку сохранения истории оценок
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            historySaveSwitch = (Switch) rootView.findViewById(R.id.history_save_switch);
+            historySaveSwitch.setChecked(saveHistory);
+        } else {
+            historySaveTB = (ToggleButton) rootView.findViewById(R.id.history_save_switch);
+            historySaveTB.setChecked(saveHistory);
+        }
         aboutAppRelative = (RelativeLayout) rootView.findViewById(R.id.about_relative);
         menuStyleRelative = (RelativeLayout) rootView.findViewById(R.id.menu_style_relative);
         shareRelative = (RelativeLayout) rootView.findViewById(R.id.share_relative);
         updateRelative = (RelativeLayout) rootView.findViewById(R.id.update_relative);
-        //получаем настройку сохранения истории оценок
-        Boolean saveHistory = pref.getBoolean("save_history", true);
-        historySaveSwitch.setChecked(saveHistory);
+
     }
 
     private void initClicks() {
@@ -81,7 +89,7 @@ public class SettingsFragment extends Fragment {
                 //удаляем данные из бд
                 colleagueRealmResults.deleteAllFromRealm();
                 realm.commitTransaction();
-                Toast.makeText(getActivity(),"Список коллег очищен!",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Список коллег очищен!", Toast.LENGTH_SHORT).show();
             }
         });
         //очищаем историю оценок
@@ -92,23 +100,38 @@ public class SettingsFragment extends Fragment {
                 //удаляем данные из бд
                 historyRealmResult.deleteAllFromRealm();
                 realm.commitTransaction();
-                Toast.makeText(getActivity(),"История оценок очищена!",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "История оценок очищена!", Toast.LENGTH_SHORT).show();
             }
         });
-
-        historySaveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    //сохранять историю
-                    editPref.putBoolean("save_history", true);
-                    editPref.commit();
-                } else {
-                    //не сохранять историю
-                    editPref.putBoolean("save_history", false);
-                    editPref.commit();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            historySaveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        //сохранять историю
+                        editPref.putBoolean("save_history", true);
+                        editPref.commit();
+                    } else {
+                        //не сохранять историю
+                        editPref.putBoolean("save_history", false);
+                        editPref.commit();
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            historySaveTB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        //сохранять историю
+                        editPref.putBoolean("save_history", true);
+                        editPref.commit();
+                    } else {
+                        //не сохранять историю
+                        editPref.putBoolean("save_history", false);
+                        editPref.commit();
+                    }
+                }
+            });
+        }
         //переходим на фрагмент "О приложении"
         aboutAppRelative.setOnClickListener(new View.OnClickListener() { //переходим на фрагмент "о приложении"
             @Override

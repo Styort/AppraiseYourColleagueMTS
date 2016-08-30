@@ -7,7 +7,7 @@
     <ImageView
         android:id="@+id/help_detail_iv"
         android:layout_width="match_parent"
-        android:src="@drawable/just_img"
+        android:src="@drawable/rez"
         android:layout_height="0dp"
         android:layout_weight="0.5" />
 
@@ -25,7 +25,7 @@
                 android:id="@+id/image_help_iv"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:src="@drawable/ic_done_white_24dp" />
+                android:src="@drawable/r1" />
 
             <TextView
                 android:id="@+id/title_help_tv"
@@ -56,6 +56,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:text="1 из 5"
-        android:textAlignment="center"
+        android:gravity="center"
         android:textSize="16sp" />
 </LinearLayout>
