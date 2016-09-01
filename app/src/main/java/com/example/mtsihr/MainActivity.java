@@ -1,12 +1,19 @@
 package com.example.mtsihr;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,6 +21,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -32,6 +40,7 @@ import com.example.mtsihr.Models.Colleague;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 import io.realm.Realm;
@@ -41,9 +50,10 @@ import io.realm.RealmConfiguration;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    NavigationView navigationView = null;
-    Toolbar toolbar = null;
-    ArrayList<Colleague> colleagues;
+    private NavigationView navigationView = null;
+    private Toolbar toolbar = null;
+    private ArrayList<Colleague> colleagues;
+    private int color;
 
 
     @Override
@@ -79,9 +89,9 @@ public class MainActivity extends AppCompatActivity
     private void initSettingsNavDraw() {
         //получаем данные с настроек
         SharedPreferences sharedPref = this.getSharedPreferences("settings", 0);
-        SharedPreferences.Editor editPref  = sharedPref.edit();
+        SharedPreferences.Editor editPref = sharedPref.edit();
 
-        int color = sharedPref.getInt("navTextColor", 0);
+        color = sharedPref.getInt("navTextColor", 0);
         //получаем картинку в текстовом формате
         String navBackImageSt = sharedPref.getString("nav_back", "");
         if (color == 0) {
@@ -106,25 +116,48 @@ public class MainActivity extends AppCompatActivity
             BitmapDrawable bmDr = new BitmapDrawable(getResources(), bm);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 navigationView.setBackground(bmDr);
-            }else {
+            } else {
                 navigationView.setBackgroundDrawable(bmDr);
             }
         }
+
+        setIconColorMenu();
 
         //получаем сохраненный эффект на задний фон
         int effect = sharedPref.getInt("img_effect", 0);
 
         //подгружает фильтр на изображение
-        switch (effect){
+        switch (effect) {
             case 0:
                 navigationView.getBackground().clearColorFilter();
                 break;
             case 1:
-                navigationView.getBackground().setColorFilter(new LightingColorFilter(0xFFFFFFFF , 0x00222222));
+                navigationView.getBackground().setColorFilter(new LightingColorFilter(0xFFFFFFFF, 0x00222222));
                 break;
             case 2:
                 navigationView.getBackground().setColorFilter(new LightingColorFilter(0xFF7F7F7F, 0x00000000));
                 break;
+        }
+
+    }
+
+    //устанавливаем цвет иконкам в меню
+    public void setIconColorMenu() {
+        Drawable colleagueIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_supervisor_account_white_24dp, null);
+        Drawable settingsIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_settings_white_24dp, null);
+        Drawable justIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_check_circle_white_24dp, null);
+        Drawable historyIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_history_white_24dp, null);
+        Drawable helpIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_live_help_white_24dp, null);
+        Drawable shareIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_rss_feed_white_24dp, null);
+        ArrayList<Drawable> drawArr = new ArrayList<>();
+        drawArr.addAll(Arrays.asList(colleagueIcon, justIcon, historyIcon, settingsIcon, helpIcon, shareIcon));
+
+        if (color==0){
+            color = Color.BLACK;
+        }
+        for (int i = 0; i < drawArr.size(); i++) {
+            drawArr.get(i).setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+            navigationView.getMenu().getItem(i).setIcon(drawArr.get(i));
         }
     }
 
@@ -158,6 +191,7 @@ public class MainActivity extends AppCompatActivity
         Fragment fragment = null;
         switch (id) {
             case R.id.nav_colleagues:
+
                 fragment = new ColleagueFragment();
                 break;
             case R.id.nav_history:

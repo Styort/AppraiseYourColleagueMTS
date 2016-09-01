@@ -17,81 +17,6 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.4">
-                <!-- android:tint="#CC000000" -->
-                <ImageView
-                    android:id="@+id/profile_image_back"
-                    android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/photo"
-                    android:tintMode="screen"
-                    android:tint="#383838" />
-
-                <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
-                    android:id="@+id/profile_image"
-                    android:layout_width="96dp"
-                    android:layout_height="96dp"
-                    android:layout_gravity="center_horizontal|top"
-                    android:layout_marginTop="30dp"
-                    android:src="@drawable/photo"
-                    app:civ_border_color="#FF000000"
-                    app:civ_border_width="2dp" />
-
-                <TextView
-                    android:id="@+id/name_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="40dp"
-                    android:text=""
-                    android:textColor="@color/colorWhite"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/post_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="65dp"
-                    android:text=""
-                    android:textColor="@color/colorWhite"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:id="@+id/subdiv_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="80dp"
-                    android:text=""
-                    android:textColor="@color/colorWhite"
-                    android:textSize="14sp" />
-
-                <at.markushi.ui.CircleButton
-                    android:id="@+id/call_colleague_butt"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="25dp"
-                    android:layout_marginRight="80dp"
-                    android:src="@drawable/ic_call_white_24dp"
-                    app:cb_color="#3470df" />
-
-                <at.markushi.ui.CircleButton
-                    android:id="@+id/sms_colleague_butt"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="25dp"
-                    android:layout_marginLeft="80dp"
-                    android:src="@drawable/ic_textsms_white_24dp"
-                    app:cb_color="#3470df" />
-            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -102,8 +27,7 @@
                 <ListView
                     android:id="@+id/lv_contacts"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp" />
+                    android:layout_height="wrap_content" />
 
                 <TextView
                     android:layout_width="wrap_content"

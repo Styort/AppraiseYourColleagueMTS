@@ -1,18 +1,23 @@
 package com.example.mtsihr.Fragments;
 
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
 import com.example.mtsihr.BlurBuilder;
@@ -23,7 +28,7 @@ import com.example.mtsihr.R;
  */
 public class AboutAppFragment extends Fragment {
     private View rootView;
-
+    private RelativeLayout helpShowRelative, feedbackRelative;
 
     public AboutAppFragment() {
         // Required empty public constructor
@@ -37,36 +42,42 @@ public class AboutAppFragment extends Fragment {
 
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("О программе"); //заголовок тулбара
 
-        final ImageView blur = (ImageView) rootView.findViewById(R.id.blur_iv);
-        SeekBar seekBar = (SeekBar) rootView.findViewById(R.id.seekBar);
-        seekBar.setMax(25); //устанавливаем максимум по размытию изображения
 
-        Bitmap bm = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.photo);
+        initElements();
+        return rootView;
+    }
 
-        //inal Bitmap blurredBitmap = BlurBuilder.blur( getActivity(), bm );
+    private void initElements() {
+        helpShowRelative = (RelativeLayout) rootView.findViewById(R.id.go_to_help_relative);
+        feedbackRelative = (RelativeLayout) rootView.findViewById(R.id.feedback_relative);
 
-        // blur.setImageBitmap(blurredBitmap);
-
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        helpShowRelative.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                blur.setImageBitmap(BlurBuilder.blur(getActivity(),
-                        BitmapFactory.decodeResource(getContext().getResources(), R.drawable.nav_draw_back), i));
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
+            public void onClick(View view) {
+                Fragment fragment = new HelpFragment();
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                FragmentTransaction transaction = fm.beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
             }
         });
+        feedbackRelative.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                emailIntent.setData(Uri.parse("mailto:"));
+                //кому отправить
+                emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"prosto_mail@mts.ru"});
+                //тема письма
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Обратная связь");
+                //текст письма
+                emailIntent.putExtra(Intent.EXTRA_TEXT, "");
 
-        return rootView;
+                if (emailIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivity(Intent.createChooser(emailIntent, "Отправить отзыв..."));
+                }
+            }
+        });
     }
 
 }

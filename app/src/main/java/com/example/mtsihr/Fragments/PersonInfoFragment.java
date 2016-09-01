@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -62,6 +64,7 @@ public class PersonInfoFragment extends Fragment {
     private ImageView photoBackground;
     private String name, post, subdiv, phone, email;
     private byte[] photo = null;
+    private View headerPersonInfo;
 
     public PersonInfoFragment() {
         // Required empty public constructor
@@ -98,22 +101,28 @@ public class PersonInfoFragment extends Fragment {
     }
 
     private void initElemets() {
-        nameTV = (TextView) rootView.findViewById(R.id.name_tv);
-        postTV = (TextView) rootView.findViewById(R.id.post_tv);
-        subdivTV = (TextView) rootView.findViewById(R.id.subdiv_tv);
         contactLV = (ListView) rootView.findViewById(R.id.lv_contacts);
         actionsLV = (ListView) rootView.findViewById(R.id.lv_action);
-        callColleagueCB = (CircleButton) rootView.findViewById(R.id.call_colleague_butt);
-        smsColleagueCB = (CircleButton) rootView.findViewById(R.id.sms_colleague_butt);
-        circlePhotoColleague = (CircleImageView) rootView.findViewById(R.id.profile_image);
-        photoBackground = (ImageView) rootView.findViewById(R.id.profile_image_back);
-
+        headerPersonInfo = createHeader();
+        contactLV.addHeaderView(headerPersonInfo);
+        //init clicks on listview elemets
         initOnItemClickListeners();
         callColleagueCB.setOnClickListener(viewClickListener);
         smsColleagueCB.setOnClickListener(viewClickListener);
 
         contactLV.setBackgroundColor(Color.WHITE);
         actionsLV.setBackgroundColor(Color.WHITE);
+    }
+
+    private View createHeader() {
+        View v = getActivity().getLayoutInflater().inflate(R.layout.person_info_header, null);
+        nameTV = (TextView) v.findViewById(R.id.name_tv);
+        postTV = (TextView) v.findViewById(R.id.post_tv);
+        subdivTV = (TextView) v.findViewById(R.id.subdiv_tv);
+        callColleagueCB = (CircleButton) v.findViewById(R.id.call_colleague_butt);
+        smsColleagueCB = (CircleButton) v.findViewById(R.id.sms_colleague_butt);
+        circlePhotoColleague = (CircleImageView) v.findViewById(R.id.profile_image);
+        photoBackground = (ImageView) v.findViewById(R.id.profile_image_back);
 
         //ловим данные с предыдущей активности
         nameTV.setText(name);
@@ -139,33 +148,37 @@ public class PersonInfoFragment extends Fragment {
         }
         //затемняем фото в бэкграунде
         photoBackground.setColorFilter(new LightingColorFilter(0xFF7F7F7F, 0x00000000));
+        return v;
     }
 
     private void initOnItemClickListeners() {
         contactLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (i == 0) {
-                    //если нажат первый элемент списка выбираем способ как позвонить
-                    if (conArr.get(i).get("Data") != "Данные не заполнены") {
-                        //Если есть номер телефона, то звоним.
-                        showPopupMenu(view);
-                    } else {
-                        //Если нет номера, показываем сообщение об этом
-                        Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    //если нажат второй элемент списка отправляем email
-                    String email = conArr.get(i).get("Data");
-                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-                    emailIntent.setData(Uri.parse("mailto:"));
-                    emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
-                    emailIntent.putExtra(Intent.EXTRA_TEXT, "");
+                switch (i){
+                    case 1:
+                        //если нажат первый элемент списка выбираем способ как позвонить
+                        if (conArr.get(0).get("Data") != "Данные не заполнены") {
+                            //Если есть номер телефона, то звоним.
+                            showPopupMenu(view);
+                        } else {
+                            //Если нет номера, показываем сообщение об этом
+                            Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    case 2:
+                        //если нажат второй элемент списка отправляем email
+                        String email = conArr.get(1).get("Data");
+                        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                        emailIntent.setData(Uri.parse("mailto:"));
+                        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
+                        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
+                        emailIntent.putExtra(Intent.EXTRA_TEXT, "");
 
-                    if (emailIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                        startActivity(Intent.createChooser(emailIntent, "Отправить email..."));
-                    }
+                        if (emailIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                            startActivity(Intent.createChooser(emailIntent, "Отправить email..."));
+                        }
+                        break;
                 }
             }
         });

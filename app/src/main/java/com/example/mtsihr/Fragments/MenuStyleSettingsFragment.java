@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
+import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -23,6 +24,7 @@ import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
@@ -50,6 +52,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import info.hoang8f.android.segmented.SegmentedGroup;
 
@@ -102,7 +106,13 @@ public class MenuStyleSettingsFragment extends Fragment {
         imageEffect = pref.getInt("img_effect", 0);
 
         previewImageNavDrawIV = (ImageView) rootView.findViewById(R.id.nav_draw_image_settings);
-        seekBar = (SeekBar) rootView.findViewById(R.id.seek_bar_settings);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            seekBar = (SeekBar) rootView.findViewById(R.id.seek_bar_settings);
+            //устанавливаем максимум по размытию изображения
+            seekBar.setMax(25);
+            //считываем сколько было размытие
+            seekBar.setProgress(blurValue);
+        }
         chooseColorTV = (TextView) rootView.findViewById(R.id.chooseColorTV);
         chooseImageButt = (Button) rootView.findViewById(R.id.choose_image_button);
         defaultSettingButt = (Button) rootView.findViewById(R.id.default_settings_butt);
@@ -114,10 +124,6 @@ public class MenuStyleSettingsFragment extends Fragment {
         chooseColorTV.setBackgroundColor(navTextColor);
         initEffect();
         previewImage = getPreviewImage();
-        //устанавливаем максимум по размытию изображения
-        seekBar.setMax(25);
-        //считываем сколько было размытие
-        seekBar.setProgress(blurValue);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             previewImageNavDrawIV.setImageBitmap(BlurBuilder.blur(getActivity(), getPreviewImage(), blurValue));
         } else {
@@ -145,7 +151,7 @@ public class MenuStyleSettingsFragment extends Fragment {
     }
 
     private void initClicks() {
-        //выбираем цвет текста в меню
+        //выбираем цвет текста и иконок в меню
         chooseColorTV.setOnClickListener(new View.OnClickListener() { //открываем colorPicker
             @Override
             public void onClick(View view) {
@@ -166,6 +172,7 @@ public class MenuStyleSettingsFragment extends Fragment {
                             public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
                                 chooseColorTV.setBackgroundColor(selectedColor);
                                 navigationView.setItemTextColor(ColorStateList.valueOf(selectedColor));
+                                setIconColorMenu(selectedColor);
                                 editPref.putInt("navTextColor", selectedColor);
                                 editPref.apply();
                             }
@@ -179,47 +186,49 @@ public class MenuStyleSettingsFragment extends Fragment {
                         .show();
             }
         });
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                if (i == 0) {
-                    previewImageNavDrawIV.setImageBitmap(previewImage);
-                    //сохраняем обработанное изображение
-                    saveNavDrImage(previewImage);
-                    blurValue = i;
-                    if (lightEffRB.isChecked()) {
-                        setFilter(1);
-                    } else if (darkEffRB.isChecked()) {
-                        setFilter(2);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                    if (i == 0) {
+                        previewImageNavDrawIV.setImageBitmap(previewImage);
+                        //сохраняем обработанное изображение
+                        saveNavDrImage(previewImage);
+                        blurValue = i;
+                        if (lightEffRB.isChecked()) {
+                            setFilter(1);
+                        } else if (darkEffRB.isChecked()) {
+                            setFilter(2);
+                        } else {
+                            setFilter(0);
+                        }
                     } else {
-                        setFilter(0);
-                    }
-                } else {
-                    Bitmap blurBM = BlurBuilder.blur(getActivity(), previewImage, i);
-                    previewImageNavDrawIV.setImageBitmap(blurBM);
-                    blurValue = i;
-                    //сохраняем обработанное изображение
-                    saveNavDrImage(blurBM);
-                    if (lightEffRB.isChecked()) {
-                        setFilter(1);
-                    } else if (darkEffRB.isChecked()) {
-                        setFilter(2);
-                    } else {
-                        setFilter(0);
+                        Bitmap blurBM = BlurBuilder.blur(getActivity(), previewImage, i);
+                        previewImageNavDrawIV.setImageBitmap(blurBM);
+                        blurValue = i;
+                        //сохраняем обработанное изображение
+                        saveNavDrImage(blurBM);
+                        if (lightEffRB.isChecked()) {
+                            setFilter(1);
+                        } else if (darkEffRB.isChecked()) {
+                            setFilter(2);
+                        } else {
+                            setFilter(0);
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
 
-            }
+                }
 
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
 
-            }
-        });
+                }
+            });
+        }
         chooseImageButt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -268,7 +277,10 @@ public class MenuStyleSettingsFragment extends Fragment {
                 editPref.putInt("img_effect", 0);
                 editPref.putInt("blur_value", 0);
                 editPref.apply();
-                seekBar.setProgress(0);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    seekBar.setProgress(0);
+                }
+                setIconColorMenu(Color.WHITE);
                 chooseColorTV.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorBlack));
                 navigationView.setItemTextColor(ColorStateList.valueOf(Color.BLACK));
                 saveNavDrImage(previewImage);
@@ -302,6 +314,21 @@ public class MenuStyleSettingsFragment extends Fragment {
                 }
             }
         });
+    }
+
+    public void setIconColorMenu(int color) {
+        Drawable colleagueIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_supervisor_account_white_24dp, null);
+        Drawable settingsIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_settings_white_24dp, null);
+        Drawable justIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_check_circle_white_24dp, null);
+        Drawable historyIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_history_white_24dp, null);
+        Drawable helpIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_live_help_white_24dp, null);
+        Drawable shareIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_rss_feed_white_24dp, null);
+        ArrayList<Drawable> drawArr = new ArrayList<>();
+        drawArr.addAll(Arrays.asList(colleagueIcon, justIcon, historyIcon, settingsIcon, helpIcon, shareIcon));
+        for (int i = 0; i < drawArr.size(); i++) {
+            drawArr.get(i).setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+            navigationView.getMenu().getItem(i).setIcon(drawArr.get(i));
+        }
     }
 
     public void setFilter(int num) {
@@ -358,7 +385,11 @@ public class MenuStyleSettingsFragment extends Fragment {
                 saveNavDrImage(bitmapMain);
                 savePreviewSetting(bitmapMain);
                 previewImage = getPreviewImage();
-                seekBar.setProgress(0);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    seekBar.setProgress(0);
+                }
+
                 noneEffRB.setChecked(true);
 
 
@@ -371,7 +402,9 @@ public class MenuStyleSettingsFragment extends Fragment {
                 saveNavDrImage(bitmapMain);
                 savePreviewSetting(bitmapMain);
                 previewImage = getPreviewImage();
-                seekBar.setProgress(0);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    seekBar.setProgress(0);
+                }
                 noneEffRB.setChecked(true);
             }
         }

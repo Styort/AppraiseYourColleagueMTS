@@ -19,11 +19,16 @@
                 android:layout_height="200dp"
                 android:scaleType="fitXY" />
 
+            <TextView
+                android:layout_marginTop="16dp"
+                android:background="@drawable/border_bottom"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="2dp"/>
             <LinearLayout
                 android:id="@+id/show_colleague_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:background="?attr/selectableItemBackground"
                 android:backgroundTint="@color/colorWhite"
                 android:clickable="true"
@@ -70,7 +75,11 @@
 
                 </LinearLayout>
             </LinearLayout>
-
+            <TextView
+                android:layout_marginTop="2dp"
+                android:background="@drawable/border_top"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -92,11 +101,7 @@
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:hint="Введите комментарий к оценке..."/>
-            <Button
-                android:id="@+id/eval_photo_butt"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Выберите фото"/>
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

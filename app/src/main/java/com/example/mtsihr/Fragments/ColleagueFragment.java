@@ -308,15 +308,21 @@ public class ColleagueFragment extends Fragment {
                 if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.READ_CONTACTS)
                         == PackageManager.PERMISSION_GRANTED) {
                     dataContact = data;
+                    colleagueIsExists = false;
                     //добавляем коллегу в список в новом потоке
                     new Thread(new Runnable() {
                         public void run() {
                             readContacts(data);
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (colleagueIsExists){
+                                        Toast.makeText(getActivity(), "Коллега уже есть в вашем списке!", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
                         }
                     }).start();
-                    if(colleagueIsExists){
-                        Toast.makeText(getActivity(), "Коллега уже есть в вашем списке!", Toast.LENGTH_SHORT).show();
-                    }
                 } else {
                     if (shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS)) {
                         Toast.makeText(getActivity(), "Read contacts needed to show contacts preview", Toast.LENGTH_LONG).show();
@@ -365,7 +371,6 @@ public class ColleagueFragment extends Fragment {
         Cursor c = getActivity().getContentResolver().query(contactData, null, null, null, null);
         String mContactId, mContactName, mPhoneNumber = null, mEmail = null, orgName = null, orgTitle = null;
         if (c.moveToNext()) {
-            colleagueIsExists = false;
             boolean isExists = false;
             mContactId = c.getString(c.getColumnIndex(ContactsContract.Contacts._ID));
             InputStream isPhoto = openDisplayPhoto(Long.parseLong(mContactId));
