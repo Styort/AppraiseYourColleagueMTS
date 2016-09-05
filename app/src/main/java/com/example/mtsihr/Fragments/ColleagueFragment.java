@@ -332,7 +332,6 @@ public class ColleagueFragment extends Fragment {
             }
         }
     }
-
     public InputStream openDisplayPhoto(long contactId) { //получаем поток с фоткой коллеги
         Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
         Uri displayPhotoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.DISPLAY_PHOTO);
@@ -344,7 +343,6 @@ public class ColleagueFragment extends Fragment {
             return null;
         }
     }
-
 
     public void searchFilter() {
         searachColleagueEdit.addTextChangedListener(new TextWatcher() {

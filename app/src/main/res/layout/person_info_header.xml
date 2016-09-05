@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <!-- android:tint="#CC000000" -->
+
     <ImageView
         android:id="@+id/profile_image_back"
         android:layout_width="match_parent"
@@ -12,25 +13,44 @@
         android:scaleType="centerCrop"
         android:src="@drawable/photo"
         android:tint="#383838"
-        android:tintMode="screen" />
+        android:tintMode="screen"
+        android:layout_gravity="center" />
 
     <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/profile_image"
         android:layout_width="96dp"
         android:layout_height="96dp"
-        android:layout_gravity="center_horizontal|top"
-        android:layout_marginTop="30dp"
+        android:layout_marginBottom="20dp"
+        android:layout_gravity="center|center_vertical"
         android:src="@drawable/photo"
         app:civ_border_color="#FF000000"
         app:civ_border_width="2dp" />
 
+    <at.markushi.ui.CircleButton
+        android:id="@+id/call_colleague_butt"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginRight="82dp"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/ic_call_white_24dp"
+        app:cb_color="#3470df"
+        android:layout_gravity="center" />
+
+    <at.markushi.ui.CircleButton
+        android:id="@+id/sms_colleague_butt"
+        android:layout_width="48dp"
+        android:layout_marginBottom="20dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="82dp"
+        android:src="@drawable/ic_textsms_white_24dp"
+        app:cb_color="#3470df"
+        android:layout_gravity="center" />
     <TextView
         android:id="@+id/name_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="40dp"
-        android:text=""
         android:textColor="@color/colorWhite"
         android:textSize="16sp"
         android:textStyle="bold" />
@@ -40,8 +60,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="65dp"
-        android:text=""
+        android:layout_marginTop="60dp"
         android:textColor="@color/colorWhite"
         android:textSize="14sp" />
 
@@ -51,27 +70,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="80dp"
-        android:text=""
         android:textColor="@color/colorWhite"
         android:textSize="14sp" />
-
-    <at.markushi.ui.CircleButton
-        android:id="@+id/sms_colleague_butt"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginLeft="80dp"
-        android:layout_marginTop="55dp"
-        android:src="@drawable/ic_textsms_white_24dp"
-        app:cb_color="#3470df" />
-
-    <at.markushi.ui.CircleButton
-        android:id="@+id/call_colleague_butt"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginRight="80dp"
-        android:layout_marginTop="55dp"
-        android:src="@drawable/ic_call_white_24dp"
-        app:cb_color="#3470df" />
 </FrameLayout>

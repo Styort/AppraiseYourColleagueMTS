@@ -21,6 +21,7 @@ import android.widget.ToggleButton;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.Models.HistoryModel;
 import com.example.mtsihr.R;
+import com.kyleduo.switchbutton.SwitchButton;
 
 
 import io.realm.Realm;
@@ -33,10 +34,10 @@ public class SettingsFragment extends Fragment {
     private View rootView;
     private Button clearHistoryData, clearColleagueData;
     private Switch historySaveSwitch;
-    private ToggleButton historySaveTB;
+    private SwitchButton historySaveTB;
     private SharedPreferences pref;
     private RelativeLayout aboutAppRelative,
-            menuStyleRelative, shareRelative, updateRelative;
+            menuStyleRelative, shareRelative, updateRelative, switchRelative;
 
     public SettingsFragment() {
     }
@@ -69,13 +70,14 @@ public class SettingsFragment extends Fragment {
             historySaveSwitch = (Switch) rootView.findViewById(R.id.history_save_switch);
             historySaveSwitch.setChecked(saveHistory);
         } else {
-            historySaveTB = (ToggleButton) rootView.findViewById(R.id.history_save_switch);
+            historySaveTB = (SwitchButton) rootView.findViewById(R.id.history_save_switch);
             historySaveTB.setChecked(saveHistory);
         }
         aboutAppRelative = (RelativeLayout) rootView.findViewById(R.id.about_relative);
         menuStyleRelative = (RelativeLayout) rootView.findViewById(R.id.menu_style_relative);
         shareRelative = (RelativeLayout) rootView.findViewById(R.id.share_relative);
         updateRelative = (RelativeLayout) rootView.findViewById(R.id.update_relative);
+        switchRelative = (RelativeLayout) rootView.findViewById(R.id.history_save_relative);
 
     }
 
@@ -182,6 +184,37 @@ public class SettingsFragment extends Fragment {
                 transaction = fm.beginTransaction();
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                 transaction.replace(R.id.fragment_container, fragment).addToBackStack(null).commit();
+            }
+        });
+        //при нажатии на relative смена switch button
+        switchRelative.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    if (historySaveSwitch.isChecked()) {
+                        historySaveSwitch.setChecked(false);
+                        //не сохранять историю
+                        editPref.putBoolean("save_history", false);
+                        editPref.commit();
+                    } else {
+                        historySaveSwitch.setChecked(true);
+                        //сохранять историю
+                        editPref.putBoolean("save_history", true);
+                        editPref.commit();
+                    }
+                } else {
+                    if (historySaveTB.isChecked()) {
+                        historySaveTB.setChecked(false);
+                        //не сохранять историю
+                        editPref.putBoolean("save_history", false);
+                        editPref.commit();
+                    } else {
+                        historySaveTB.setChecked(true);
+                        //сохранять историю
+                        editPref.putBoolean("save_history", true);
+                        editPref.commit();
+                    }
+                }
             }
         });
     }

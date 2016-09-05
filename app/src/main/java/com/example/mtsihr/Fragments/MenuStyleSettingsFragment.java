@@ -21,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -43,6 +44,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.mtsihr.BlurBuilder;
 import com.example.mtsihr.R;
+import com.fivehundredpx.android.blur.BlurringView;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
@@ -76,7 +78,6 @@ public class MenuStyleSettingsFragment extends Fragment {
     private RadioButton noneEffRB, lightEffRB, darkEffRB;
     private SegmentedGroup segmentedGroup;
 
-
     public MenuStyleSettingsFragment() {
         // Required empty public constructor
     }
@@ -104,7 +105,6 @@ public class MenuStyleSettingsFragment extends Fragment {
         navTextColor = pref.getInt("navTextColor", 0);
         blurValue = pref.getInt("blur_value", 1);
         imageEffect = pref.getInt("img_effect", 0);
-
         previewImageNavDrawIV = (ImageView) rootView.findViewById(R.id.nav_draw_image_settings);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             seekBar = (SeekBar) rootView.findViewById(R.id.seek_bar_settings);
@@ -207,7 +207,7 @@ public class MenuStyleSettingsFragment extends Fragment {
                         previewImageNavDrawIV.setImageBitmap(blurBM);
                         blurValue = i;
                         //сохраняем обработанное изображение
-                        saveNavDrImage(blurBM);
+                        //saveNavDrImage(blurBM);
                         if (lightEffRB.isChecked()) {
                             setFilter(1);
                         } else if (darkEffRB.isChecked()) {
@@ -229,6 +229,7 @@ public class MenuStyleSettingsFragment extends Fragment {
                 }
             });
         }
+
         chooseImageButt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

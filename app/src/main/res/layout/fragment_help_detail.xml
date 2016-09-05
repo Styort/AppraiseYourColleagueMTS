@@ -9,6 +9,7 @@
         android:layout_width="match_parent"
         android:src="@drawable/rez"
         android:layout_height="0dp"
+        android:scaleType="centerCrop"
         android:layout_weight="0.5" />
 
     <ScrollView
