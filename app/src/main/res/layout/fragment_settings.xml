@@ -5,96 +5,114 @@
     android:orientation="vertical"
     tools:context="com.example.mtsihr.Fragments.SettingsFragment">
 
-    <RelativeLayout
-        android:id="@+id/about_relative"
+    <com.balysv.materialripple.MaterialRippleLayout
+        android:id="@+id/ripple"
         android:layout_width="match_parent"
         android:layout_height="46dp"
-        android:layout_marginTop="16dp"
-        android:background="?attr/selectableItemBackground"
-        android:clickable="true"
-        android:orientation="horizontal">
+        android:layout_marginTop="16dp">
 
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
-            android:text="@string/about_settings"
-            android:textColor="@color/colorBlack"
-            android:textSize="18sp" />
+        <RelativeLayout
+            android:id="@+id/about_relative"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@+id/textView2"
-            android:layout_marginRight="16dp"
-            android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:text="@string/about_settings"
+                android:textColor="@color/colorBlack"
+                android:textSize="18sp" />
 
-    <RelativeLayout
-        android:id="@+id/update_relative"
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/textView2"
+                android:layout_marginRight="16dp"
+                android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
+        </RelativeLayout>
+    </com.balysv.materialripple.MaterialRippleLayout>
+
+    <com.balysv.materialripple.MaterialRippleLayout
         android:layout_width="match_parent"
-        android:layout_height="46dp"
-        android:background="?attr/selectableItemBackground"
-        android:clickable="true"
-        android:orientation="horizontal">
+        android:layout_height="46dp">
 
-        <TextView
-            android:id="@+id/textView7"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
-            android:text="@string/update_settings"
-            android:textColor="@color/colorBlack"
-            android:textSize="18sp" />
+        <RelativeLayout
+            android:id="@+id/update_relative"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@+id/textView7"
-            android:layout_marginRight="16dp"
-            android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/textView7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:text="@string/update_settings"
+                android:textColor="@color/colorBlack"
+                android:textSize="18sp" />
 
-    <RelativeLayout
-        android:id="@+id/share_relative"
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/textView7"
+                android:layout_marginRight="16dp"
+                android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
+        </RelativeLayout>
+    </com.balysv.materialripple.MaterialRippleLayout>
+
+
+    <com.balysv.materialripple.MaterialRippleLayout
         android:layout_width="match_parent"
-        android:layout_height="46dp"
-        android:background="?attr/selectableItemBackground"
-        android:clickable="true"
-        android:orientation="horizontal">
+        android:layout_height="46dp">
 
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
-            android:text="@string/share_settings"
-            android:textColor="@color/colorBlack"
-            android:textSize="18sp" />
+        <RelativeLayout
+            android:id="@+id/share_relative"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@+id/textView4"
-            android:layout_marginRight="16dp"
-            android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:text="@string/share_settings"
+                android:textColor="@color/colorBlack"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/textView4"
+                android:layout_marginRight="16dp"
+                android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
+        </RelativeLayout>
+
+    </com.balysv.materialripple.MaterialRippleLayout>
 
     <TextView
         android:layout_width="match_parent"
@@ -104,35 +122,40 @@
         android:text="@string/share_settings_summary"
         android:textSize="16sp" />
 
-    <RelativeLayout
-        android:id="@+id/menu_style_relative"
+    <com.balysv.materialripple.MaterialRippleLayout
         android:layout_width="match_parent"
-        android:layout_height="46dp"
-        android:background="?attr/selectableItemBackground"
-        android:clickable="true"
-        android:orientation="horizontal">
+        android:layout_height="46dp">
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
-            android:text="@string/menu_style_settings"
-            android:textColor="@color/colorBlack"
-            android:textSize="18sp" />
+        <RelativeLayout
+            android:id="@+id/menu_style_relative"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@+id/textView3"
-            android:layout_marginRight="16dp"
-            android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:text="@string/menu_style_settings"
+                android:textColor="@color/colorBlack"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/textView3"
+                android:layout_marginRight="16dp"
+                android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
+        </RelativeLayout>
+    </com.balysv.materialripple.MaterialRippleLayout>
 
     <TextView
         android:layout_width="match_parent"
@@ -142,38 +165,43 @@
         android:text="@string/menu_style_settings_summary"
         android:textSize="16sp" />
 
-    <RelativeLayout
-        android:id="@+id/history_save_relative"
+    <com.balysv.materialripple.MaterialRippleLayout
         android:layout_width="match_parent"
-        android:layout_height="46dp"
-        android:background="?attr/selectableItemBackground"
-        android:clickable="true"
-        android:orientation="horizontal">
+        android:layout_height="46dp">
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
-            android:text="@string/save_history_settings"
-            android:textColor="@color/colorBlack"
-            android:textSize="18sp" />
+        <RelativeLayout
+            android:id="@+id/history_save_relative"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:orientation="horizontal">
 
-        <com.kyleduo.switchbutton.SwitchButton
-            android:id="@+id/history_save_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="16dp"
-            android:checked="true">
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:text="@string/save_history_settings"
+                android:textColor="@color/colorBlack"
+                android:textSize="18sp" />
 
-        </com.kyleduo.switchbutton.SwitchButton>
-    </RelativeLayout>
+            <com.kyleduo.switchbutton.SwitchButton
+                android:id="@+id/history_save_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp"
+                android:checked="true">
+
+            </com.kyleduo.switchbutton.SwitchButton>
+        </RelativeLayout>
+    </com.balysv.materialripple.MaterialRippleLayout>
 
     <TextView
         android:layout_width="match_parent"

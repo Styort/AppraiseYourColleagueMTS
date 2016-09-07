@@ -37,6 +37,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,6 +78,7 @@ public class MenuStyleSettingsFragment extends Fragment {
     private NavigationView navigationView;
     private RadioButton noneEffRB, lightEffRB, darkEffRB;
     private SegmentedGroup segmentedGroup;
+    private RelativeLayout chooseColorRelative;
 
     public MenuStyleSettingsFragment() {
         // Required empty public constructor
@@ -121,6 +123,7 @@ public class MenuStyleSettingsFragment extends Fragment {
         lightEffRB = (RadioButton) rootView.findViewById(R.id.img_eff_light_rb);
         darkEffRB = (RadioButton) rootView.findViewById(R.id.img_eff_dark_rb);
         segmentedGroup = (SegmentedGroup) rootView.findViewById(R.id.segmented);
+        chooseColorRelative = (RelativeLayout) rootView.findViewById(R.id.choose_color_relative);
         chooseColorTV.setBackgroundColor(navTextColor);
         initEffect();
         previewImage = getPreviewImage();
@@ -152,7 +155,7 @@ public class MenuStyleSettingsFragment extends Fragment {
 
     private void initClicks() {
         //выбираем цвет текста и иконок в меню
-        chooseColorTV.setOnClickListener(new View.OnClickListener() { //открываем colorPicker
+        chooseColorRelative.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ColorPickerDialogBuilder

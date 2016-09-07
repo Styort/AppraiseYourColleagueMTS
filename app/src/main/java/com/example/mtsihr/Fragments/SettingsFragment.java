@@ -2,6 +2,7 @@ package com.example.mtsihr.Fragments;
 
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -18,6 +19,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.balysv.materialripple.MaterialRippleLayout;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.Models.HistoryModel;
 import com.example.mtsihr.R;
@@ -78,7 +80,6 @@ public class SettingsFragment extends Fragment {
         shareRelative = (RelativeLayout) rootView.findViewById(R.id.share_relative);
         updateRelative = (RelativeLayout) rootView.findViewById(R.id.update_relative);
         switchRelative = (RelativeLayout) rootView.findViewById(R.id.history_save_relative);
-
     }
 
     private void initClicks() {

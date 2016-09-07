@@ -1,37 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.balysv.materialripple.MaterialRippleLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tv_color_eval"
-        android:layout_width="10dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center_vertical"
-        android:background="@color/colorRed" />
-
-    <TextView
-        android:id="@+id/choose_eval_tv"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_vertical"
-        android:textSize="16sp"
-        android:layout_marginLeft="10dp"
-        android:paddingBottom="3dip"
-        android:paddingTop="2dip"/>
+        android:orientation="horizontal">
 
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        <TextView
+            android:id="@+id/tv_color_eval"
+            android:layout_width="10dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical"
+            android:background="@color/colorRed" />
 
-    <ImageView
-        android:id="@+id/choose_eval_iv"
-        android:src="@drawable/ic_done_white_24dp"
-        android:visibility="invisible"
-        android:layout_width="24dp"
-        android:layout_marginRight="16dp"
-        android:layout_gravity="center_vertical"
-        android:layout_height="24dp" />
-</LinearLayout>
+        <TextView
+            android:id="@+id/choose_eval_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:gravity="center_vertical"
+            android:paddingBottom="3dip"
+            android:paddingTop="2dip"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/choose_eval_iv"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="16dp"
+            android:src="@drawable/ic_done_white_24dp"
+            android:visibility="invisible" />
+    </LinearLayout>
+</com.balysv.materialripple.MaterialRippleLayout>

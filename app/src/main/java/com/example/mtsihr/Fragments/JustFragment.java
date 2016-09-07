@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -31,6 +32,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.balysv.materialripple.MaterialRippleLayout;
 import com.example.mtsihr.Adapters.EvaluateAdapter;
 import com.example.mtsihr.EvaluateActivity;
 import com.example.mtsihr.MainActivity;
@@ -114,6 +116,7 @@ public class JustFragment extends Fragment {
         commentET = (EditText) rootView.findViewById(R.id.comment_et);
         justBackgrIV = (ImageView) rootView.findViewById(R.id.just_bg_iv);
         getRandomBackgroundImg();
+
 
         showColleagueLL.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -67,25 +67,6 @@ public class ChooseEvaluateAdapter extends ArrayAdapter {
             default:
                 viewHolder.tvColorEval.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRed));
         }
-
-        /*
-        Intent intent = context.getIntent();
-
-        ImageView ic_eval = (ImageView)convertView.findViewById(R.id.choose_eval_iv);
-        int color = Color.parseColor("#00BFFF"); //The color u want
-        ic_eval.setColorFilter(color);
-
-        String imgIsVis = intent.getStringExtra("eval");
-
-        for (int i = 0; i < evaluateList.size(); i++) {
-            if (evaluateList.get(i).evaluate.contains(imgIsVis)){
-                ic_eval.setVisibility(View.VISIBLE);
-            }else {
-                ic_eval.setVisibility(View.INVISIBLE);
-            }
-        }
-        */
-
         return convertView;
     }
 }

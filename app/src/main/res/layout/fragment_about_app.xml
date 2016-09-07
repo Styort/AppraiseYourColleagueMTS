@@ -77,35 +77,38 @@
                 android:textAlignment="textEnd"
                 android:textSize="16sp" />
         </LinearLayout>
-
-        <RelativeLayout
-            android:id="@+id/go_to_help_relative"
+        <com.balysv.materialripple.MaterialRippleLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:orientation="horizontal">
+            android:layout_height="46dp">
+            <RelativeLayout
+                android:id="@+id/go_to_help_relative"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="16dp"
-                android:text="Помощь/Справка"
-                android:textColor="@color/colorLightBlue"
-                android:textSize="16sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="16dp"
+                    android:text="Помощь/Справка"
+                    android:textColor="@color/colorLightBlue"
+                    android:textSize="16sp" />
 
-            <ImageView
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="14dp"
-                android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
-        </RelativeLayout>
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="14dp"
+                    android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
+            </RelativeLayout>
+        </com.balysv.materialripple.MaterialRippleLayout>
 
         <TextView
             android:layout_width="match_parent"
@@ -113,34 +116,39 @@
             android:layout_marginLeft="16dp"
             android:background="@drawable/border_bottom" />
 
-        <RelativeLayout
-            android:id="@+id/feedback_relative"
+        <com.balysv.materialripple.MaterialRippleLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:orientation="horizontal">
+            android:layout_height="46dp">
+            <RelativeLayout
+                android:id="@+id/feedback_relative"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="16dp"
-                android:text="Обратная связь"
-                android:textColor="@color/colorLightBlue"
-                android:textSize="16sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="16dp"
+                    android:text="Обратная связь"
+                    android:textColor="@color/colorLightBlue"
+                    android:textSize="16sp" />
 
-            <ImageView
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="14dp"
-                android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
-        </RelativeLayout>
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="14dp"
+                    android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
+            </RelativeLayout>
+        </com.balysv.materialripple.MaterialRippleLayout>
+
 
         <TextView
             android:layout_width="match_parent"

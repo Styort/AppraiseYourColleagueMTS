@@ -37,7 +37,6 @@
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
                     android:text="ДЕЙСТВИЯ" />
-
                 <ListView
                     android:id="@+id/lv_action"
                     android:layout_width="match_parent"

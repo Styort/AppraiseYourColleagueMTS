@@ -1,55 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal" android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+<com.balysv.materialripple.MaterialRippleLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_gravity="center"
-        android:layout_centerVertical="true"
-        android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/first_sign_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="16dp"
+                    android:text="П"
+                    android:textColor="@color/colorRed"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/eval_name_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="артнерство"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
             <TextView
-                android:id="@+id/first_sign_tv"
+                android:id="@+id/eval_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:layout_marginLeft="16dp"
-                android:layout_width="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:text="Не выбрано"
                 android:textColor="@color/colorRed"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
-                android:text="П"/>
-            <TextView
-                android:id="@+id/eval_name_tv"
-                android:layout_width="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
-                android:text="артнерство"/>
+                android:textSize="14sp" />
         </LinearLayout>
-        <TextView
-            android:id="@+id/eval_tv"
-            android:layout_marginLeft="16dp"
-            android:layout_gravity="center_vertical"
-            android:layout_width="wrap_content"
-            android:textColor="@color/colorRed"
-            android:textSize="14sp"
-            android:layout_height="wrap_content"
-            android:text="Не выбрано"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/ic_eval_iv"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:layout_marginRight="16dp"
+            android:src="@drawable/ic_keyboard_arrow_right_black_24dp" />
     </LinearLayout>
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-    <ImageView
-        android:id="@+id/ic_eval_iv"
-        android:layout_marginRight="16dp"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
-        android:layout_width="30dp"
-        android:layout_height="30dp" />
-</LinearLayout>
+</com.balysv.materialripple.MaterialRippleLayout>
