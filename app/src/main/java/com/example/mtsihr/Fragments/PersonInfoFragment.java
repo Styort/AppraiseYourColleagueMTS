@@ -19,6 +19,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +29,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -40,6 +42,7 @@ import com.example.mtsihr.BlurBuilder;
 import com.example.mtsihr.MainActivity;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.R;
+import com.github.pinball83.maskededittext.MaskedEditText;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,6 +69,7 @@ public class PersonInfoFragment extends Fragment {
     private String name, post, subdiv, phone, email;
     private byte[] photo = null;
     private View headerPersonInfo;
+    private HashMap<String, String> map = new HashMap<String, String>();
 
     public PersonInfoFragment() {
         // Required empty public constructor
@@ -155,34 +159,108 @@ public class PersonInfoFragment extends Fragment {
     private void initOnItemClickListeners() {
         contactLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                switch (i){
+            public void onItemClick(final AdapterView<?> adapterView, View view, int i, long l) {
+                switch (i) {
                     case 1:
                         //если нажат первый элемент списка выбираем способ как позвонить
                         if (conArr.get(0).get("Data") != "Данные не заполнены") {
                             //Если есть номер телефона, то звоним.
                             showPopupMenu(view);
+
                         } else {
-                            //Если нет номера, показываем сообщение об этом
-                            Toast.makeText(getActivity(), "Не заполнен номер телефона коллеги!", Toast.LENGTH_SHORT).show();
+                            //если телефон не заполнен, то открываем поле ввода номера телефона
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            builder.setTitle("Введите номер телефона коллеги");
+
+                            //поле ввода с маской
+                            final MaskedEditText maskedEditText = new MaskedEditText(getActivity(),
+                                    "+7 (***) *** **-**",
+                                    "*");
+                            builder.setView(maskedEditText);
+
+                            builder.setPositiveButton("Готово", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    realm.executeTransaction(new Realm.Transaction() {
+                                        @Override
+                                        public void execute(Realm realm) {
+                                            Colleague toEdit = realm.where(Colleague.class)
+                                                    .equalTo("name", name).findFirst();
+                                            if (toEdit != null) {
+                                                //добавляем номер телефона в бд и обновляем адаптер, чтобы данные в фрагменте обновились
+                                                toEdit.setPhone(maskedEditText.getText().toString());
+                                                conArr.get(0).put("Data", maskedEditText.getText().toString());
+                                                initAdapter();
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                            builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            });
+
+                            builder.show();
                         }
                         break;
                     case 2:
                         //если нажат второй элемент списка отправляем email
-                        String email = conArr.get(1).get("Data");
-                        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-                        emailIntent.setData(Uri.parse("mailto:"));
-                        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
-                        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
-                        emailIntent.putExtra(Intent.EXTRA_TEXT, "");
+                        if (conArr.get(1).get("Data") != "Данные не заполнены") {
+                            String email = conArr.get(1).get("Data");
+                            Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                            emailIntent.setData(Uri.parse("mailto:"));
+                            emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
+                            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
+                            emailIntent.putExtra(Intent.EXTRA_TEXT, "");
 
-                        if (emailIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                            startActivity(Intent.createChooser(emailIntent, "Отправить email..."));
+                            if (emailIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                                startActivity(Intent.createChooser(emailIntent, "Отправить email..."));
+                            }
+                            break;
+                        }else {
+                            //если email не заполнен, открываем поле ввода email
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            builder.setTitle("Введите email коллеги");
+
+                            final EditText editText = new EditText(getActivity());
+                            builder.setView(editText);
+
+                            builder.setPositiveButton("Готово", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    realm.executeTransaction(new Realm.Transaction() {
+                                        @Override
+                                        public void execute(Realm realm) {
+                                            Colleague toEdit = realm.where(Colleague.class)
+                                                    .equalTo("name", name).findFirst();
+                                            if (toEdit != null) {
+                                                //добавляем email в бд и обновляем адаптер, чтобы данные в фрагменте обновились
+                                                toEdit.setEmail(editText.getText().toString());
+                                                conArr.get(1).put("Data", editText.getText().toString());
+                                                initAdapter();
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                            builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            });
+
+                            builder.show();
+
                         }
-                        break;
+
                 }
             }
         });
+
         actionsLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -247,8 +325,8 @@ public class PersonInfoFragment extends Fragment {
 
     private void initAdapter() {
         //создаем HashMap с контактными данными
-        HashMap<String, String> map = new HashMap<String, String>();
         if (conArr.size() == 0) { //не добавлять больше элементов, если номер телефона и эмейл есть в conArr
+            //добавляем номер телефона в список
             map.put("Name", "сотовый");
             if (phone != null) {
                 map.put("Data", phone);
@@ -256,15 +334,15 @@ public class PersonInfoFragment extends Fragment {
                 map.put("Data", "Данные не заполнены");
             }
             conArr.add(map);
-            try {
-                if (email != null) {
-                    map = new HashMap<>();
-                    map.put("Name", "рабочий");
-                    map.put("Data", email);
-                    conArr.add(map);
-                }
-            } catch (NullPointerException ex) {
-                ex.printStackTrace();
+            //добавляем email в список
+            map = new HashMap<>();
+            map.put("Name", "рабочий");
+            if (email != null) {
+                map.put("Data", email);
+                conArr.add(map);
+            }else{
+                map.put("Data","Данные не заполнены");
+                conArr.add(map);
             }
         }
 
