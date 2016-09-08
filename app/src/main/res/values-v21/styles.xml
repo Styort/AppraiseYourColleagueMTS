@@ -2,6 +2,11 @@
     <style name="MyTheme" parent="@android:style/Theme.Light">
         <item name="android:windowBackground">@color/background</item>
     </style>
+    <style name="NavigationDrawerStyle">
+        <item name="android:textSize">16sp</item><!-- text size in menu-->
+        <item name="android:listPreferredItemHeightSmall">40dp</item><!-- item size in menu-->
+        <item name="android:textStyle">bold</item>
+    </style>
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>

@@ -1,0 +1,103 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.mtsihr.Fragments.EditPersonInfoFragment">
+
+    <TextView
+        android:id="@+id/colleague_name_ei_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="18dp"
+        android:layout_marginRight="18dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="5dp"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <com.github.florent37.materialtextfield.MaterialTextField
+        android:id="@+id/phone_mtf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="5dp"
+        app:mtf_image="@drawable/ic_contact_phone_black_24dp"
+        app:mtf_labelColor="@color/colorBlack">
+
+        <EditText
+            android:id="@+id/edit_phone_ei_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Телефон"
+            android:textColor="#333"
+            android:textColorHint="#666"
+            android:textSize="16sp" />
+
+    </com.github.florent37.materialtextfield.MaterialTextField>
+
+    <com.github.florent37.materialtextfield.MaterialTextField
+        android:id="@+id/email_mtf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        app:mtf_image="@drawable/ic_contact_mail_black_24dp"
+        app:mtf_labelColor="@color/colorBlack">
+
+        <EditText
+            android:id="@+id/edit_email_ei_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"
+            android:textColor="#333"
+            android:textColorHint="#666"
+            android:textSize="16sp" />
+
+    </com.github.florent37.materialtextfield.MaterialTextField>
+
+    <com.github.florent37.materialtextfield.MaterialTextField
+        android:id="@+id/org_mtf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="5dp"
+        app:mtf_image="@drawable/ic_business_black_24dp"
+        app:mtf_labelColor="@color/colorBlack">
+
+        <EditText
+            android:id="@+id/edit_org_ei_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Организация"
+            android:textColor="#333"
+            android:textColorHint="#666"
+            android:textSize="16sp" />
+
+    </com.github.florent37.materialtextfield.MaterialTextField>
+
+    <com.github.florent37.materialtextfield.MaterialTextField
+        android:id="@+id/post_mtf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="5dp"
+        app:mtf_image="@drawable/ic_keyboard_black_24dp"
+        app:mtf_labelColor="@color/colorBlack">
+
+        <EditText
+            android:id="@+id/edit_post_ei_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Должность"
+            android:textColor="#333"
+            android:textColorHint="#666"
+            android:textSize="16sp" />
+
+    </com.github.florent37.materialtextfield.MaterialTextField>
+
+</LinearLayout>

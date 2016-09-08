@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,14 +18,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -37,7 +34,6 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.balysv.materialripple.MaterialRippleLayout;
 import com.example.mtsihr.BlurBuilder;
 import com.example.mtsihr.MainActivity;
 import com.example.mtsihr.Models.Colleague;
@@ -274,7 +270,7 @@ public class PersonInfoFragment extends Fragment {
                         transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
 
                         //получаем данные от предыдущего фрагмента
-                        Bundle getDataBundle = getArguments();
+                       // Bundle getDataBundle = getArguments();
                         //передаем данные в слудующий фрагмент
                         Bundle passDataBundle = new Bundle();
 
@@ -317,6 +313,25 @@ public class PersonInfoFragment extends Fragment {
                             passHistCollDataBundle.putString("email", email);
                         }
                         historyFragment.setArguments(passHistCollDataBundle);
+                        break;
+                    case 3:
+                        //Нажат элемент "Редактировать информацию"
+                        Fragment editPersonInfoFragment = new EditPersonInfoFragment();
+                        FragmentManager editFm = getActivity().getSupportFragmentManager();
+                        FragmentTransaction editTrans = editFm.beginTransaction();
+                        editTrans.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                        editTrans.replace(((ViewGroup) getView().getParent()).getId(), editPersonInfoFragment).addToBackStack(null).commit();
+
+                        Bundle passInfoDataBundle = new Bundle();
+
+                        passInfoDataBundle.putString("name", name);
+                        passInfoDataBundle.putString("post", post);
+                        passInfoDataBundle.putString("subdiv", subdiv);
+                        passInfoDataBundle.putString("phone", phone);
+                        passInfoDataBundle.putString("email", email);
+                        passInfoDataBundle.putInt("position", getDataBundle.getInt("position", 0));
+                        editPersonInfoFragment.setArguments(passInfoDataBundle);
+
                         break;
                 }
             }
@@ -361,7 +376,7 @@ public class PersonInfoFragment extends Fragment {
         contactLV.setAdapter(adapter);
 
         //лист с действиями
-        String[] actionName = {"Оценить коллегу", "Заказать детальный отчет", "Просмотреть историю оценок"};
+        String[] actionName = {"Оценить коллегу", "Заказать детальный отчет", "Просмотреть историю оценок", "Редактировать информацию"};
         actionsLV.setAdapter(new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1, actionName));
         //задаем высоту листам в зависимости от кол-ва его элементов

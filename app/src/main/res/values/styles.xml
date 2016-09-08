@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -11,7 +11,9 @@
 
     <style name="NavigationDrawerStyle">
         <item name="android:textSize">16sp</item><!-- text size in menu-->
+        <item name="android:colorForeground">#000000</item>
         <item name="android:listPreferredItemHeightSmall">40dp</item><!-- item size in menu-->
+        <item name="android:fontFamily" tools:targetApi="jelly_bean">sans-serif-medium</item>
         <item name="android:textStyle">bold</item>
     </style>
 
