@@ -20,7 +20,7 @@ import android.widget.Toast;
 import com.example.mtsihr.MainActivity;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.R;
-import com.github.florent37.materialtextfield.MaterialTextField;
+import com.github.pinball83.maskededittext.MaskedEditText;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -32,11 +32,11 @@ public class EditPersonInfoFragment extends Fragment {
 
     private View rootView;
     private TextView colleagueNameTV;
-    private EditText editPhoneET, editEmailET, editOrgET, editPostET;
+    private MaskedEditText editPhoneET;
+    private EditText editEmailET, editOrgET, editPostET;
     private Bundle getDataBundle;
     private Realm realm;
     private int position;
-    private MaterialTextField phoneMTF, emailMTF, orgMTF, postMTF;
 
     public EditPersonInfoFragment() {
         // Required empty public constructor
@@ -60,27 +60,25 @@ public class EditPersonInfoFragment extends Fragment {
 
     private void initElements() {
         colleagueNameTV = (TextView) rootView.findViewById(R.id.colleague_name_ei_tv);
-        editPhoneET = (EditText) rootView.findViewById(R.id.edit_phone_ei_et);
+        editPhoneET = (MaskedEditText) rootView.findViewById(R.id.edit_phone_ei_et);
         editEmailET = (EditText) rootView.findViewById(R.id.edit_email_ei_et);
         editOrgET = (EditText) rootView.findViewById(R.id.edit_org_ei_et);
         editPostET = (EditText) rootView.findViewById(R.id.edit_post_ei_et);
-        phoneMTF = (MaterialTextField) rootView.findViewById(R.id.phone_mtf);
-        emailMTF = (MaterialTextField) rootView.findViewById(R.id.email_mtf);
-        orgMTF = (MaterialTextField) rootView.findViewById(R.id.org_mtf);
-        postMTF = (MaterialTextField) rootView.findViewById(R.id.post_mtf);
-
-        //раскрываем materialTextFiel
-        phoneMTF.expand();
-        emailMTF.expand();
-        orgMTF.expand();
-        postMTF.expand();
     }
 
     //получаем данные с предыдущуего фрагмента
     public void getData() {
         if (getDataBundle != null) {
             colleagueNameTV.setText(getDataBundle.getString("name"));
-            editPhoneET.setText(getDataBundle.getString("phone"));
+            String phoneNum = getDataBundle.getString("phone");
+            if(phoneNum!=null){
+                //удаление лишних символов из номера телефона
+                if(phoneNum.length()>10){
+                    phoneNum = getPhoneNum(phoneNum);
+                    phoneNum = phoneNum.substring(phoneNum.length()-10,phoneNum.length());
+                }
+            }
+            editPhoneET.setMaskedText(phoneNum);
             editEmailET.setText(getDataBundle.getString("email"));
             editOrgET.setText(getDataBundle.getString("post"));
             editPostET.setText(getDataBundle.getString("subdiv"));
@@ -107,7 +105,10 @@ public class EditPersonInfoFragment extends Fragment {
                                 .equalTo("name", colleagueNameTV.getText().toString()).findFirst();
                         if (toEdit != null) {
                             //добавляем данные о коллеге в бд
-                            toEdit.setPhone(editPhoneET.getText().toString());
+                            String et = editPhoneET.getText().toString();
+                            if(getPhoneNum(et).length()==11){
+                                toEdit.setPhone(editPhoneET.getText().toString());
+                            }
                             toEdit.setEmail(editEmailET.getText().toString());
                             toEdit.setSubdivision(editPostET.getText().toString());
                             toEdit.setPost(editOrgET.getText().toString());
@@ -122,5 +123,16 @@ public class EditPersonInfoFragment extends Fragment {
         }
 
         return (super.onOptionsItemSelected(item));
+    }
+    public String getPhoneNum(String num){
+        num = num.replaceAll("\\(", "");
+        num = num.replaceAll("\\)", "");
+        num = num.replaceAll("\\+", "");
+        num = num.replaceAll(" ", "");
+        num = num.replaceAll("\\-", "");
+        num = num.replaceAll("\\(", "");
+        num = num.replaceAll("\\)", "");
+
+        return num;
     }
 }

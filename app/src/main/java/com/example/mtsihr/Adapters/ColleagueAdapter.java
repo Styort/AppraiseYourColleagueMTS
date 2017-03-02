@@ -1,10 +1,12 @@
 package com.example.mtsihr.Adapters;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -14,11 +16,15 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.R;
 import com.example.mtsihr.ViewHolder;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -135,11 +141,22 @@ public class ColleagueAdapter extends ArrayAdapter {
         viewHolder.colleagueName.setText(colleagueList.get(position).name); //номер телефона
         viewHolder.colleaguePost.setText(colleagueList.get(position).post); //должность
         viewHolder.colleagueSubdiv.setText(colleagueList.get(position).subdivision); //подразделение
-        if(colleagueList.get(position).getPhoto()!=null){
+        if (colleagueList.get(position).getPhoto() != null) {
+            //ПОФИКСИТЬ OutOfMemory
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(colleagueList.get(position).getPhoto(), 0,
+                    colleagueList.get(position).getPhoto().length, options);
+
+            // Calculate inSampleSize
+            options.inSampleSize = calculateInSampleSize(options, 250, 250);
+            // Decode bitmap with inSampleSize set
+            options.inJustDecodeBounds = false;
             Bitmap bm = BitmapFactory.decodeByteArray(colleagueList.get(position).getPhoto(), 0,
-                    colleagueList.get(position).getPhoto().length);
+                    colleagueList.get(position).getPhoto().length, options);
+
             viewHolder.colleaguePhoto.setImageBitmap(bm);
-        }else {
+        } else {
             viewHolder.colleaguePhoto.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.photo));
         }
         //меняем цвет у стрелочки
@@ -149,4 +166,26 @@ public class ColleagueAdapter extends ArrayAdapter {
         return convertView;
     }
 
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
 }

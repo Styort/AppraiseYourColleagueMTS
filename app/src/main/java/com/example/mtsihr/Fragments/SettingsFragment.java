@@ -112,11 +112,11 @@ public class SettingsFragment extends Fragment {
                     if (isChecked) {
                         //сохранять историю
                         editPref.putBoolean("save_history", true);
-                        editPref.commit();
+                        editPref.apply();
                     } else {
                         //не сохранять историю
                         editPref.putBoolean("save_history", false);
-                        editPref.commit();
+                        editPref.apply();
                     }
                 }
             });
@@ -126,11 +126,11 @@ public class SettingsFragment extends Fragment {
                     if (isChecked) {
                         //сохранять историю
                         editPref.putBoolean("save_history", true);
-                        editPref.commit();
+                        editPref.apply();
                     } else {
                         //не сохранять историю
                         editPref.putBoolean("save_history", false);
-                        editPref.commit();
+                        editPref.apply();
                     }
                 }
             });
@@ -196,24 +196,24 @@ public class SettingsFragment extends Fragment {
                         historySaveSwitch.setChecked(false);
                         //не сохранять историю
                         editPref.putBoolean("save_history", false);
-                        editPref.commit();
+                        editPref.apply();
                     } else {
                         historySaveSwitch.setChecked(true);
                         //сохранять историю
                         editPref.putBoolean("save_history", true);
-                        editPref.commit();
+                        editPref.apply();
                     }
                 } else {
                     if (historySaveTB.isChecked()) {
                         historySaveTB.setChecked(false);
                         //не сохранять историю
                         editPref.putBoolean("save_history", false);
-                        editPref.commit();
+                        editPref.apply();
                     } else {
                         historySaveTB.setChecked(true);
                         //сохранять историю
                         editPref.putBoolean("save_history", true);
-                        editPref.commit();
+                        editPref.apply();
                     }
                 }
             }

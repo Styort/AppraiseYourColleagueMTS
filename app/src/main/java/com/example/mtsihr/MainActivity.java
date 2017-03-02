@@ -1,25 +1,19 @@
 package com.example.mtsihr;
 
-import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
@@ -28,9 +22,9 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
-import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.mtsihr.Fragments.AuthFragment;
 import com.example.mtsihr.Fragments.ColleagueFragment;
 import com.example.mtsihr.Fragments.HelpFragment;
 import com.example.mtsihr.Fragments.HistoryFragment;
@@ -41,7 +35,6 @@ import com.example.mtsihr.Models.Colleague;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -84,6 +77,9 @@ public class MainActivity extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         initSettingsNavDraw();
+
+        //String[] fingerprints = VKUtil.getCertificateFingerprint(this, this.getPackageName());
+        //System.out.println(Arrays.asList(fingerprints));
     }
 
     private void initSettingsNavDraw() {
@@ -191,7 +187,6 @@ public class MainActivity extends AppCompatActivity
         Fragment fragment = null;
         switch (id) {
             case R.id.nav_colleagues:
-
                 fragment = new ColleagueFragment();
                 break;
             case R.id.nav_history:
@@ -213,6 +208,8 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_just:
                 fragment = new JustFragment();
                 break;
+            case R.id.nav_auth:
+                fragment = new AuthFragment();
         }
         if (fragment != null) {
             fragmentTransaction = getSupportFragmentManager().beginTransaction();

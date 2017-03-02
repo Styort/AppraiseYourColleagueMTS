@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.jar.Manifest;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -53,7 +52,6 @@ import io.realm.RealmResults;
  * A simple {@link Fragment} subclass.
  */
 public class ColleagueFragment extends Fragment {
-
     private static final int REQUEST_READ_CONTACT = 555;
     private Realm realm;
     private ListView colleagueList;

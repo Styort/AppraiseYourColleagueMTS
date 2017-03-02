@@ -34,7 +34,6 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.mtsihr.BlurBuilder;
 import com.example.mtsihr.MainActivity;
 import com.example.mtsihr.Models.Colleague;
 import com.example.mtsihr.R;
@@ -47,6 +46,7 @@ import at.markushi.ui.CircleButton;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import jp.wasabeef.blurry.Blurry;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -133,12 +133,8 @@ public class PersonInfoFragment extends Fragment {
             byte[] photoByte = photo;
             Bitmap bm = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
             circlePhotoColleague.setImageBitmap(bm);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                // применяем размытое изображение
-                photoBackground.setImageBitmap(BlurBuilder.blur(getActivity(), bm, 20));
-            } else {
-                photoBackground.setImageBitmap(bm);
-            }
+
+            Blurry.with(getContext()).from(bm).into(photoBackground);
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 //Bitmap photo = BitmapFactory.decodeResource(getContext().getResources(),
@@ -216,7 +212,7 @@ public class PersonInfoFragment extends Fragment {
                                 startActivity(Intent.createChooser(emailIntent, "Отправить email..."));
                             }
                             break;
-                        }else {
+                        } else {
                             //если email не заполнен, открываем поле ввода email
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                             builder.setTitle("Введите email коллеги");
@@ -270,7 +266,7 @@ public class PersonInfoFragment extends Fragment {
                         transaction.replace(((ViewGroup) getView().getParent()).getId(), fragment).addToBackStack(null).commit();
 
                         //получаем данные от предыдущего фрагмента
-                       // Bundle getDataBundle = getArguments();
+                        // Bundle getDataBundle = getArguments();
                         //передаем данные в слудующий фрагмент
                         Bundle passDataBundle = new Bundle();
 
@@ -355,8 +351,8 @@ public class PersonInfoFragment extends Fragment {
             if (email != null) {
                 map.put("Data", email);
                 conArr.add(map);
-            }else{
-                map.put("Data","Данные не заполнены");
+            } else {
+                map.put("Data", "Данные не заполнены");
                 conArr.add(map);
             }
         }

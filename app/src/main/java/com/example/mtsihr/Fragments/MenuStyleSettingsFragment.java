@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -19,9 +18,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.MediaStore;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -29,7 +26,6 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
-import android.util.EventLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,10 +38,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.example.mtsihr.BlurBuilder;
 import com.example.mtsihr.R;
-import com.fivehundredpx.android.blur.BlurringView;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
@@ -53,12 +47,12 @@ import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import info.hoang8f.android.segmented.SegmentedGroup;
+import jp.wasabeef.blurry.Blurry;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -108,13 +102,11 @@ public class MenuStyleSettingsFragment extends Fragment {
         blurValue = pref.getInt("blur_value", 1);
         imageEffect = pref.getInt("img_effect", 0);
         previewImageNavDrawIV = (ImageView) rootView.findViewById(R.id.nav_draw_image_settings);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            seekBar = (SeekBar) rootView.findViewById(R.id.seek_bar_settings);
-            //устанавливаем максимум по размытию изображения
-            seekBar.setMax(25);
-            //считываем сколько было размытие
-            seekBar.setProgress(blurValue);
-        }
+        seekBar = (SeekBar) rootView.findViewById(R.id.seek_bar_settings);
+        //устанавливаем максимум по размытию изображения
+        seekBar.setMax(25);
+        //считываем сколько было размытие
+        seekBar.setProgress(blurValue);
         chooseColorTV = (TextView) rootView.findViewById(R.id.chooseColorTV);
         chooseImageButt = (Button) rootView.findViewById(R.id.choose_image_button);
         defaultSettingButt = (Button) rootView.findViewById(R.id.default_settings_butt);
@@ -189,49 +181,46 @@ public class MenuStyleSettingsFragment extends Fragment {
                         .show();
             }
         });
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                    if (i == 0) {
-                        previewImageNavDrawIV.setImageBitmap(previewImage);
-                        //сохраняем обработанное изображение
-                        saveNavDrImage(previewImage);
-                        blurValue = i;
-                        if (lightEffRB.isChecked()) {
-                            setFilter(1);
-                        } else if (darkEffRB.isChecked()) {
-                            setFilter(2);
-                        } else {
-                            setFilter(0);
-                        }
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if (i == 0) {
+                    previewImageNavDrawIV.setImageBitmap(previewImage);
+                    //сохраняем обработанное изображение
+                    saveNavDrImage(previewImage);
+                    blurValue = i;
+                    if (lightEffRB.isChecked()) {
+                        setFilter(1);
+                    } else if (darkEffRB.isChecked()) {
+                        setFilter(2);
                     } else {
-                        Bitmap blurBM = BlurBuilder.blur(getActivity(), previewImage, i);
-                        previewImageNavDrawIV.setImageBitmap(blurBM);
-                        blurValue = i;
-                        //сохраняем обработанное изображение
-                        //saveNavDrImage(blurBM);
-                        if (lightEffRB.isChecked()) {
-                            setFilter(1);
-                        } else if (darkEffRB.isChecked()) {
-                            setFilter(2);
-                        } else {
-                            setFilter(0);
-                        }
+                        setFilter(0);
+                    }
+                } else {
+                    Blurry.with(getContext()).radius(i).from(previewImage).into(previewImageNavDrawIV);
+                    blurValue = i;
+                    //сохраняем обработанное изображение
+                    //saveNavDrImage(blurBM);
+                    if (lightEffRB.isChecked()) {
+                        setFilter(1);
+                    } else if (darkEffRB.isChecked()) {
+                        setFilter(2);
+                    } else {
+                        setFilter(0);
                     }
                 }
+            }
 
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
 
-                }
+            }
 
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
 
-                }
-            });
-        }
+            }
+        });
 
         chooseImageButt.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -284,7 +273,7 @@ public class MenuStyleSettingsFragment extends Fragment {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     seekBar.setProgress(0);
                 }
-                setIconColorMenu(Color.WHITE);
+                setIconColorMenu(Color.BLACK);
                 chooseColorTV.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorBlack));
                 navigationView.setItemTextColor(ColorStateList.valueOf(Color.BLACK));
                 saveNavDrImage(previewImage);
