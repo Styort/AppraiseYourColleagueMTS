@@ -24,7 +24,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.view.MenuItem;
 
-import com.example.mtsihr.Fragments.AuthFragment;
 import com.example.mtsihr.Fragments.ColleagueFragment;
 import com.example.mtsihr.Fragments.HelpFragment;
 import com.example.mtsihr.Fragments.HistoryFragment;
@@ -87,6 +86,7 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences sharedPref = this.getSharedPreferences("settings", 0);
         SharedPreferences.Editor editPref = sharedPref.edit();
 
+        int blurValue = sharedPref.getInt("blurValue",0);
         color = sharedPref.getInt("navTextColor", 0);
         //получаем картинку в текстовом формате
         String navBackImageSt = sharedPref.getString("nav_back", "");
@@ -208,8 +208,6 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_just:
                 fragment = new JustFragment();
                 break;
-            case R.id.nav_auth:
-                fragment = new AuthFragment();
         }
         if (fragment != null) {
             fragmentTransaction = getSupportFragmentManager().beginTransaction();

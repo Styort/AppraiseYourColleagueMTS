@@ -38,7 +38,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.mtsihr.BlurBuilder;
 import com.example.mtsihr.R;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
@@ -120,7 +119,7 @@ public class MenuStyleSettingsFragment extends Fragment {
         initEffect();
         previewImage = getPreviewImage();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            previewImageNavDrawIV.setImageBitmap(BlurBuilder.blur(getActivity(), getPreviewImage(), blurValue));
+            Blurry.with(getContext()).radius(blurValue).from(getPreviewImage()).into(previewImageNavDrawIV);
         } else {
             previewImageNavDrawIV.setImageBitmap(getPreviewImage());
         }
